@@ -43,9 +43,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="text-slate-800">
-        <Navbar />
+        
         <main className="min-h-screen">{children}</main>
-        <Footer />
+        
         <CTASticky />
         <Suspense fallback={null}>
           <script
