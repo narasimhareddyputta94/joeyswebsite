@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Loader } from "@googlemaps/js-api-loader";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Scale,
@@ -33,11 +34,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 /* ------------------------------------------------------------
-   LAW FIRM – Home (leveled up)
-   - Address → Savings Estimator (Ownwell-style)
-   - Team section
-   - Sticky CTA bar + Book drawer
-   - Testimonials + FAQ
+   Cumberland Brooks – Home
+   - Ownwell-style estimator with Places autocomplete
+   - 2-step lead capture + Calendly drawer (prefilled)
+   - Team + Testimonials + FAQ + Sticky CTA
    ------------------------------------------------------------ */
 
 /* ========================= helpers ========================= */
@@ -55,7 +55,20 @@ function cn(...a: (string | undefined | false)[]) {
 }
 
 /* ========================= BOOK DRAWER ========================= */
-function BookDrawer({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+function BookDrawer({
+  open,
+  onOpenChange,
+  prefill,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  prefill?: {
+    name?: string;
+    email?: string;
+    address?: string;
+    ptype?: "residential" | "commercial";
+  };
+}) {
   useEffect(() => {
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onOpenChange(false);
     window.addEventListener("keydown", onEsc);
@@ -64,10 +77,26 @@ function BookDrawer({ open, onOpenChange }: { open: boolean; onOpenChange: (v: b
 
   if (!open) return null;
 
+  // Your real Calendly link
+  const calendlyBase = "https://calendly.com/narasimhareddyputta999/15min";
+  const url = new URL(calendlyBase);
+  // Prefill supported params
+  if (prefill?.name) url.searchParams.set("name", prefill.name);
+  if (prefill?.email) url.searchParams.set("email", prefill.email);
+  // If you create custom questions in Calendly, you can pass a1/a2 etc.
+  if (prefill?.address) url.searchParams.set("a1", prefill.address);
+  if (prefill?.ptype) url.searchParams.set("a2", prefill.ptype);
+
   return (
     <div className="fixed inset-0 z-[60]">
       <div className="absolute inset-0 bg-black/40" onClick={() => onOpenChange(false)} />
-      <div className="absolute inset-y-0 right-0 w-full max-w-lg bg-white shadow-xl">
+      <motion.div
+        initial={{ x: 520, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: 520, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 240, damping: 24 }}
+        className="absolute inset-y-0 right-0 w-full max-w-lg bg-white shadow-xl"
+      >
         <div className="flex items-center justify-between border-b p-4">
           <h3 className="font-serif text-xl">Book a Free Consultation</h3>
           <button aria-label="Close" onClick={() => onOpenChange(false)}>
@@ -75,21 +104,20 @@ function BookDrawer({ open, onOpenChange }: { open: boolean; onOpenChange: (v: b
           </button>
         </div>
         <div className="p-4">
-          {/* Swap this src with your Calendly/booking link */}
           <iframe
-            title="booking"
-            src="https://calendly.com/your-handle/30min?hide_gdpr_banner=1&background_color=ffffff"
+            title="Calendly"
+            src={url.toString()}
             className="h-[70vh] w-full rounded-md border"
           />
           <p className="mt-3 text-xs text-slate-500">
-            Prefer phone? Call {" "}
+            Prefer phone? Call{" "}
             <a className="underline" href="tel:+13124889775">
               (312) 488-9775
             </a>
             .
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -136,11 +164,7 @@ function Navbar({ onOpenBook }: { onOpenBook: () => void }) {
             Book a Free Consultation
           </Button>
         </div>
-        <button
-          className="md:hidden"
-          aria-label="Toggle menu"
-          onClick={() => setOpen((s) => !s)}
-        >
+        <button className="md:hidden" aria-label="Toggle menu" onClick={() => setOpen((s) => !s)}>
           {open ? <X /> : <Menu />}
         </button>
       </div>
@@ -169,18 +193,52 @@ function Navbar({ onOpenBook }: { onOpenBook: () => void }) {
   );
 }
 
-/* =================== ADDRESS ESTIMATOR (HERO) =================== */
-function AddressEstimator() {
+/* ========== ADDRESS ESTIMATOR (hero widget with lead capture) ========== */
+function AddressEstimator({
+  onBook,
+}: {
+  onBook: (prefill: {
+    email?: string;
+    address?: string;
+    name?: string;
+    ptype: "residential" | "commercial";
+  }) => void;
+}) {
   const [ptype, setPtype] = useState<"residential" | "commercial">("residential");
   const [address, setAddress] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [result, setResult] = useState<null | {
     addressNormalized: string;
     estimatedSavings: number;
     inputs: { marketValue: number; assessedValue: number; taxRate: number };
     disclaimer: string;
   }>(null);
+
+  // lead fields
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [consent, setConsent] = useState(true);
+
+  // Google Places Autocomplete
+  useEffect(() => {
+    const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!key || !inputRef.current) return;
+    const loader = new Loader({ apiKey: key, libraries: ["places"] });
+    loader.load().then(() => {
+      const ac = new google.maps.places.Autocomplete(inputRef.current!, {
+        types: ["address"],
+        fields: ["formatted_address"],
+      });
+      ac.addListener("place_changed", () => {
+        const p = ac.getPlace();
+        setAddress(p?.formatted_address || inputRef.current!.value);
+      });
+    });
+  }, []);
 
   async function estimate() {
     if (!address) return;
@@ -196,6 +254,7 @@ function AddressEstimator() {
       const data = await r.json();
       if (!r.ok) throw new Error(data?.error || "Failed to estimate");
       setResult(data);
+      setStep(2);
     } catch (e: any) {
       setError(e.message || "Something went wrong");
     } finally {
@@ -203,15 +262,41 @@ function AddressEstimator() {
     }
   }
 
+  async function submitLead() {
+    if (!email || !address) return;
+    setLoading(true);
+    try {
+      await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          phone,
+          address,
+          ptype,
+          estimate: result,
+          consent,
+          middleName: "", // honeypot
+        }),
+      });
+      setStep(3);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="w-full">
+      {/* property tabs */}
       <div className="mb-2 flex gap-2">
         {(["residential", "commercial"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setPtype(t)}
             className={`rounded-full border px-3 py-1 text-sm ${
-              ptype === t ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-700 hover:bg-slate-50"
+              ptype === t
+                ? "bg-indigo-600 text-white border-indigo-600"
+                : "bg-white text-slate-700 hover:bg-slate-50"
             }`}
           >
             {t[0].toUpperCase() + t.slice(1)}
@@ -219,51 +304,137 @@ function AddressEstimator() {
         ))}
       </div>
 
-      <div className="flex w-full items-stretch gap-2 rounded-full border bg-white p-1 shadow-md">
-        <div className="flex items-center pl-3 text-slate-500">
-          <MapPin className="h-5 w-5" />
-        </div>
-        <input
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Enter address"
-          className="w-full rounded-full px-3 py-3 outline-none"
-        />
-        <Button onClick={estimate} className="rounded-full px-5">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Get Savings Estimate"}
-        </Button>
-      </div>
+      {/* Step 1: address input */}
+      {step === 1 && (
+        <>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex w-full items-stretch gap-2 rounded-full border bg-white p-1 shadow-md"
+          >
+            <div className="flex items-center pl-3 text-slate-500">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <input
+              ref={inputRef}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Enter address"
+              className="w-full rounded-full px-3 py-3 outline-none"
+            />
+            <Button onClick={estimate} className="rounded-full px-5">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Get Savings Estimate"}
+            </Button>
+          </motion.div>
+          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        </>
+      )}
 
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {/* Step 2: estimate + lead capture */}
+      {step === 2 && result && (
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="mt-3 rounded-2xl border bg-white p-4 shadow-sm">
+            <p className="text-sm text-slate-500">{result.addressNormalized}</p>
+            <div className="mt-2 flex items-end gap-3">
+              <DollarSign className="h-9 w-9 text-emerald-600" />
+              <div>
+                <p className="text-2xl font-semibold text-emerald-700">
+                  ~${result.estimatedSavings.toLocaleString()} / yr
+                </p>
+                <p className="text-xs text-slate-600">Estimated property tax savings</p>
+              </div>
+            </div>
+            <div className="mt-3 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
+              <div className="rounded-xl border bg-slate-50 p-3">
+                <p className="text-slate-500">Assessed value</p>
+                <p className="font-medium">
+                  ${Math.round(result.inputs.assessedValue).toLocaleString()}
+                </p>
+              </div>
+              <div className="rounded-xl border bg-slate-50 p-3">
+                <p className="text-slate-500">Market value</p>
+                <p className="font-medium">
+                  ${Math.round(result.inputs.marketValue).toLocaleString()}
+                </p>
+              </div>
+              <div className="rounded-xl border bg-slate-50 p-3">
+                <p className="text-slate-500">Tax rate</p>
+                <p className="font-medium">{(result.inputs.taxRate * 100).toFixed(2)}%</p>
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">{result.disclaimer}</p>
 
-      {result && (
-        <div className="mt-3 rounded-2xl border bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">{result.addressNormalized}</p>
-          <div className="mt-2 flex items-end gap-3">
-            <DollarSign className="h-9 w-9 text-emerald-600" />
-            <div>
-              <p className="text-2xl font-semibold text-emerald-700">
-                ~${result.estimatedSavings.toLocaleString()} / yr
-              </p>
-              <p className="text-xs text-slate-600">Estimated property tax savings</p>
+            {/* lead fields */}
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="sm:col-span-2 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg border bg-white p-2">
+                  <input
+                    type="email"
+                    placeholder="Email to send full report"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full outline-none"
+                  />
+                </div>
+                <div className="rounded-lg border bg-white p-2">
+                  <input
+                    type="tel"
+                    placeholder="Phone (optional)"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full outline-none"
+                  />
+                </div>
+                <input type="text" name="middleName" style={{ display: "none" }} onChange={() => {}} />
+                <label className="col-span-2 mt-1 flex items-center gap-2 text-xs text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                  />
+                  I agree to be contacted about my estimate. No spam—just results.
+                </label>
+              </div>
+              <div className="flex items-start justify-end">
+                <Button onClick={submitLead} className="rounded-full px-5" disabled={!email || loading}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Email me the full report"}
+                </Button>
+              </div>
+            </div>
+
+            {/* book now CTA */}
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs text-emerald-700">
+                <ShieldCheck className="h-4 w-4" /> No upfront fees
+              </span>
+              <Button
+                variant="outline"
+                className="rounded-full"
+                onClick={() => onBook({ email, address, ptype })}
+              >
+                Book Free Consultation
+              </Button>
             </div>
           </div>
-          <div className="mt-3 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
-            <div className="rounded-xl border bg-slate-50 p-3">
-              <p className="text-slate-500">Assessed value</p>
-              <p className="font-medium">${Math.round(result.inputs.assessedValue).toLocaleString()}</p>
-            </div>
-            <div className="rounded-xl border bg-slate-50 p-3">
-              <p className="text-slate-500">Market value</p>
-              <p className="font-medium">${Math.round(result.inputs.marketValue).toLocaleString()}</p>
-            </div>
-            <div className="rounded-xl border bg-slate-50 p-3">
-              <p className="text-slate-500">Tax rate</p>
-              <p className="font-medium">{(result.inputs.taxRate * 100).toFixed(2)}%</p>
+        </motion.div>
+      )}
+
+      {/* Step 3: thanks → push to book */}
+      {step === 3 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="mt-3 rounded-2xl border bg-white p-5 shadow-sm">
+            <p className="font-serif text-lg">Report on the way ✅</p>
+            <p className="mt-1 text-slate-600">Want to fast-track results? Book a free call.</p>
+            <div className="mt-3 flex gap-2">
+              <Button className="rounded-full" onClick={() => onBook({ email, address, ptype })}>
+                Book Free Consultation
+              </Button>
+              <Button variant="outline" className="rounded-full" onClick={() => setStep(1)}>
+                Check another address
+              </Button>
             </div>
           </div>
-          <p className="mt-2 text-xs text-slate-500">{result.disclaimer}</p>
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -297,10 +468,7 @@ function Hero({ onOpenBook }: { onOpenBook: () => void }) {
           <motion.p variants={item} className="mb-3 font-medium text-indigo-600">
             You only pay when we save you money
           </motion.p>
-          <motion.h1
-            variants={item}
-            className="font-serif text-4xl leading-tight text-slate-900 md:text-5xl"
-          >
+          <motion.h1 variants={item} className="font-serif text-4xl leading-tight text-slate-900 md:text-5xl">
             Expert Negotiators. Real Savings.
           </motion.h1>
           <motion.p variants={item} className="mt-4 max-w-xl text-lg text-slate-700">
@@ -318,13 +486,15 @@ function Hero({ onOpenBook }: { onOpenBook: () => void }) {
 
           {/* Estimator */}
           <motion.div variants={item} className="mt-6 max-w-xl">
-            <AddressEstimator />
+            <AddressEstimator
+              onBook={(prefill) => {
+                // lift to page-level drawer with prefill
+                window.dispatchEvent(new CustomEvent("open-book", { detail: prefill }));
+              }}
+            />
           </motion.div>
 
-          <motion.div
-            variants={item}
-            className="mt-8 flex flex-wrap items-center gap-6 text-sm text-slate-600"
-          >
+          <motion.div variants={item} className="mt-8 flex flex-wrap items-center gap-6 text-sm text-slate-600">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5" /> No upfront fees
             </div>
@@ -353,9 +523,7 @@ function Hero({ onOpenBook }: { onOpenBook: () => void }) {
           <div className="absolute inset-0 bg-gradient-to-tr from-slate-900/70 via-slate-900/20 to-transparent" />
           <div className="absolute bottom-4 left-4 rounded-xl bg-white/80 p-4 backdrop-blur">
             <p className="text-sm text-slate-600">Our brand vision</p>
-            <p className="font-serif text-xl text-slate-900">
-              Relentless advocacy. Transparent results.
-            </p>
+            <p className="font-serif text-xl text-slate-900">Relentless advocacy. Transparent results.</p>
           </div>
         </motion.div>
       </motion.div>
@@ -585,9 +753,21 @@ function Process() {
 /* ========================= TEAM ========================= */
 function Team() {
   const people = [
-    { name: "Alexandra Brooks, Esq.", role: "Managing Partner", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop" },
-    { name: "Jordan Lee", role: "Senior Case Analyst", img: "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?q=80&w=800&auto=format&fit=crop" },
-    { name: "Samir Patel", role: "Negotiations Lead", img: "https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=800&auto=format&fit=crop" },
+    {
+      name: "Alexandra Brooks, Esq.",
+      role: "Managing Partner",
+      img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      name: "Jordan Lee",
+      role: "Senior Case Analyst",
+      img: "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      name: "Samir Patel",
+      role: "Negotiations Lead",
+      img: "https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=800&auto=format&fit=crop",
+    },
   ];
   return (
     <section id="team" className="bg-white py-20">
@@ -595,7 +775,9 @@ function Team() {
         <div className="mx-auto max-w-2xl text-center">
           <p className="kicker text-indigo-600">Meet your team</p>
           <h2 className="font-serif text-3xl text-slate-900 md:text-4xl">Experienced. Precise. Human.</h2>
-          <p className="mt-3 text-slate-600">A cross‑functional crew of attorneys, analysts, and negotiators on your side.</p>
+          <p className="mt-3 text-slate-600">
+            A cross-functional crew of attorneys, analysts, and negotiators on your side.
+          </p>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {people.map((p, i) => (
@@ -736,9 +918,7 @@ function Footer() {
   return (
     <footer className="border-t bg-white py-10 text-sm">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 md:flex-row md:px-6">
-        <p className="text-slate-600">
-          © {new Date().getFullYear()} Cumberland Brooks, LLC. All rights reserved.
-        </p>
+        <p className="text-slate-600">© {new Date().getFullYear()} Cumberland Brooks, LLC. All rights reserved.</p>
         <div className="flex items-center gap-6 text-slate-600">
           <a href="#">Privacy</a>
           <a href="#">Terms</a>
@@ -783,6 +963,21 @@ function StickyCTA({ onOpenBook }: { onOpenBook: () => void }) {
 /* ========================= PAGE ========================= */
 export default function Page() {
   const [drawer, setDrawer] = useState(false);
+  const [prefill, setPrefill] = useState<{
+    name?: string;
+    email?: string;
+    address?: string;
+    ptype?: "residential" | "commercial";
+  }>();
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      setPrefill(e.detail);
+      setDrawer(true);
+    };
+    window.addEventListener("open-book" as any, handler);
+    return () => window.removeEventListener("open-book" as any, handler);
+  }, []);
 
   return (
     <main className="text-slate-800">
@@ -797,7 +992,7 @@ export default function Page() {
       <Contact />
       <Footer />
       <StickyCTA onOpenBook={() => setDrawer(true)} />
-      <BookDrawer open={drawer} onOpenChange={setDrawer} />
+      <BookDrawer open={drawer} onOpenChange={setDrawer} prefill={prefill} />
     </main>
   );
 }
