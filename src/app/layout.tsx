@@ -43,15 +43,39 @@ const jsonLd = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="text-slate-800">
-        <Navbar />
-        <TrustBar /> {/* 👈 the scrolling message bar lives below the navbar */}
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+      <body className="text-slate-800 antialiased">
+        {/* Accessibility: skip straight to content */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-indigo-600 focus:px-3 focus:py-2 focus:text-white"
+        >
+          Skip to main content
+        </a>
+
+        {/* Page shell (sticky footer) */}
+        <div className="flex min-h-screen flex-col">
+          <header className="sticky top-0 z-50">
+            <Navbar />
+            {/* Scrolling message bar directly under the navbar */}
+            <TrustBar />
+          </header>
+
+          {/* Main content grows */}
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+
+          <Footer />
+        </div>
+
+        {/* Sticky CTA floats above everything */}
         <CTASticky />
+
+        {/* SEO structured data */}
         <Suspense fallback={null}>
           <script
             type="application/ld+json"
+            // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           />
         </Suspense>
