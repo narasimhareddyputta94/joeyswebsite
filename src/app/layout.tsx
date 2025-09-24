@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CTASticky from "@/components/CTASticky";
+import TrustBar from "@/components/TrustBar";
 
 export const metadata: Metadata = {
   title: "Cumberland Brooks, LLC — Expert Negotiators. Real Savings.",
@@ -43,9 +44,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="text-slate-800">
-        
+        <Navbar />
+        <TrustBar /> {/* 👈 the scrolling message bar lives below the navbar */}
         <main className="min-h-screen">{children}</main>
-        
+        <Footer />
         <CTASticky />
         <Suspense fallback={null}>
           <script
