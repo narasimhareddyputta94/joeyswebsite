@@ -1,27 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Loader } from "@googlemaps/js-api-loader";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import {
-  Scale, ShieldCheck, Gavel, MessageSquare, Phone, Users2, Clock4, Sparkles,
-  ChevronRight, ChevronLeft, CheckCircle2, Award, Briefcase, FileCheck2, Mail, MapPin, Menu,
-  X, Star, Quote, Plus, Minus, Loader2, DollarSign, Building2, Building, Handshake, LandPlot, Landmark
+  ChevronRight, ChevronLeft, ShieldCheck, FileCheck2, Clock4, Handshake, DollarSign,
+  MapPin, Phone, Mail, Users2, Award, Briefcase, ClipboardCheck, Quote, Star,
+  Scale, Gavel, Stethoscope, Building2, Landmark, LandPlot, FileCheck2 as FileCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-/* ========================= animation helpers ========================= */
-const container = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { staggerChildren: 0.08, duration: 0.6, ease: "easeOut" } },
-};
+/* ----------------------------- Anim helpers ----------------------------- */
+const container = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { staggerChildren: 0.06, duration: .5 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
-function cn(...a: (string | undefined | false)[]) { return a.filter(Boolean).join(" "); }
 
-/* ========================= BOOK DRAWER (Calendly) ========================= */
+/* ========================== BOOK DRAWER (Calendly) ========================== */
 function BookDrawer({
   open, onOpenChange, prefill,
 }: {
@@ -39,7 +34,6 @@ function BookDrawer({
 
   const calendlyBase = "https://calendly.com/narasimhareddyputta999/15min";
   const url = new URL(calendlyBase);
-  // Prefill
   if (prefill?.name) url.searchParams.set("name", prefill.name);
   if (prefill?.email) url.searchParams.set("email", prefill.email);
   if (prefill?.address) url.searchParams.set("a1", prefill.address);
@@ -57,7 +51,9 @@ function BookDrawer({
       >
         <div className="flex items-center justify-between border-b p-4">
           <h3 className="font-serif text-xl">Book a Free Consultation</h3>
-          <button aria-label="Close" onClick={() => onOpenChange(false)}><X /></button>
+          <button aria-label="Close" onClick={() => onOpenChange(false)} className="rounded-md p-1 hover:bg-slate-50">
+            <ChevronRight className="rotate-180" />
+          </button>
         </div>
         <div className="p-4">
           <iframe title="Calendly" src={url.toString()} className="h-[70vh] w-full rounded-md border" />
@@ -70,51 +66,7 @@ function BookDrawer({
   );
 }
 
-/* ========================= NAVBAR ========================= */
-function Navbar({ onOpenBook }: { onOpenBook: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  return (
-    <div className={cn("fixed inset-x-0 top-0 z-50 transition-all", scrolled ? "backdrop-blur bg-white/70 shadow-sm" : "bg-transparent")}>
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-600 to-blue-500" />
-          <span className="font-serif text-xl tracking-tight text-slate-900">Cumberland Brooks, LLC</span>
-        </Link>
-        <nav className="hidden items-center gap-8 md:flex">
-          <Link href="/services" className="text-slate-700 hover:text-slate-900">Services</Link>
-          <Link href="/results" className="text-slate-700 hover:text-slate-900">Results</Link>
-          <Link href="/faq" className="text-slate-700 hover:text-slate-900">FAQ</Link>
-          <Link href="/contact" className="text-slate-700 hover:text-slate-900">Contact</Link>
-        </nav>
-        <div className="hidden md:block">
-          <Button className="rounded-full px-5" onClick={onOpenBook}>Book Free Consultation</Button>
-        </div>
-        <button className="md:hidden" aria-label="Toggle menu" onClick={() => setOpen((s) => !s)}>
-          {open ? <X /> : <Menu />}
-        </button>
-      </div>
-      {open && (
-        <div className="border-t bg-white/90 px-4 py-3 md:hidden">
-          <div className="flex flex-col gap-3">
-            <Link href="/services" onClick={() => setOpen(false)}>Services</Link>
-            <Link href="/results" onClick={() => setOpen(false)}>Results</Link>
-            <Link href="/faq" onClick={() => setOpen(false)}>FAQ</Link>
-            <Link href="/contact" onClick={() => setOpen(false)}>Contact</Link>
-            <Button className="rounded-full" onClick={onOpenBook}>Free Consultation</Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ========== ADDRESS ESTIMATOR (hero widget with lead capture) ========== */
+/* ========================= ADDRESS ESTIMATOR (mini) ========================= */
 function AddressEstimator({
   onBook,
 }: {
@@ -122,52 +74,17 @@ function AddressEstimator({
 }) {
   const [ptype, setPtype] = useState<"residential" | "commercial">("residential");
   const [address, setAddress] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [result, setResult] = useState<null | {
-    addressNormalized: string;
-    estimatedSavings: number;
-    inputs: { marketValue: number; assessedValue: number; taxRate: number };
-    disclaimer: string;
-  }>(null);
-
-  // lead fields
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [consent, setConsent] = useState(true);
+  const [estimate, setEstimate] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Google Places Autocomplete
-  useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!key || !inputRef.current) return;
-    const loader = new Loader({ apiKey: key, libraries: ["places"] });
-    loader.load().then(() => {
-      const ac = new google.maps.places.Autocomplete(inputRef.current!, { types: ["address"], fields: ["formatted_address"] });
-      ac.addListener("place_changed", () => {
-        const p = ac.getPlace();
-        setAddress(p?.formatted_address || inputRef.current!.value);
-      });
-    });
-  }, []);
-
-  async function estimate() {
+  async function runEstimate() {
     if (!address) return;
-    setLoading(true); setError(null); setResult(null);
+    setLoading(true);
     try {
-      const r = await fetch("/api/estimate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address, propertyType: ptype }),
-      });
+      const r = await fetch("/api/estimate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ address, propertyType: ptype }) });
       const data = await r.json();
-      if (!r.ok) throw new Error(data?.error || "Failed to estimate");
-      setResult(data);
-      setStep(2);
-    } catch (e: any) {
-      setError(e.message || "Something went wrong");
+      setEstimate(data?.estimatedSavings ?? null);
     } finally {
       setLoading(false);
     }
@@ -175,22 +92,12 @@ function AddressEstimator({
 
   async function submitLead() {
     if (!email || !address) return;
-    setLoading(true);
-    try {
-      await fetch("/api/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, phone, address, ptype, estimate: result, consent, middleName: "" }),
-      });
-      setStep(3);
-    } finally {
-      setLoading(false);
-    }
+    await fetch("/api/lead", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, address, ptype, source: "home-hero" }) });
+    onBook({ email, address, ptype });
   }
 
   return (
-    <div className="w-full">
-      {/* property tabs */}
+    <div className="rounded-2xl border bg-white/90 p-4 shadow-sm backdrop-blur">
       <div className="mb-2 flex gap-2">
         {(["residential", "commercial"] as const).map((t) => (
           <button
@@ -202,121 +109,45 @@ function AddressEstimator({
           </button>
         ))}
       </div>
-
-      {/* Step 1: address input */}
-      {step === 1 && (
-        <>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex w-full items-stretch gap-2 rounded-full border bg-white p-1 shadow-md">
-            <div className="flex items-center pl-3 text-slate-500"><MapPin className="h-5 w-5" /></div>
+      <div className="grid gap-2 sm:grid-cols-3">
+        <input
+          placeholder="Enter address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 sm:col-span-2"
+        />
+        <Button onClick={runEstimate} className="rounded-lg">{loading ? "Estimating..." : "Get estimate"}</Button>
+      </div>
+      {estimate !== null && (
+        <div className="mt-3 grid items-center gap-2 sm:grid-cols-3">
+          <p className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-700 sm:col-span-2">
+            <DollarSign className="h-4 w-4" /> Estimated savings: ~${estimate.toLocaleString()} / yr
+          </p>
+          <div className="flex gap-2">
             <input
-              ref={inputRef}
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter address"
-              className="w-full rounded-full px-3 py-3 outline-none"
+              type="email"
+              placeholder="Email for full report"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            <Button onClick={estimate} className="rounded-full px-5">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Get Savings Estimate"}
-            </Button>
-          </motion.div>
-          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-        </>
-      )}
-
-      {/* Step 2: estimate + lead capture */}
-      {step === 2 && result && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="mt-3 rounded-2xl border bg-white p-4 shadow-sm">
-            <p className="text-sm text-slate-500">{result.addressNormalized}</p>
-            <div className="mt-2 flex items-end gap-3">
-              <DollarSign className="h-9 w-9 text-emerald-600" />
-              <div>
-                <p className="text-2xl font-semibold text-emerald-700">~${result.estimatedSavings.toLocaleString()} / yr</p>
-                <p className="text-xs text-slate-600">Estimated property tax savings</p>
-              </div>
-            </div>
-            <div className="mt-3 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
-              <div className="rounded-xl border bg-slate-50 p-3">
-                <p className="text-slate-500">Assessed value</p>
-                <p className="font-medium">${Math.round(result.inputs.assessedValue).toLocaleString()}</p>
-              </div>
-              <div className="rounded-xl border bg-slate-50 p-3">
-                <p className="text-slate-500">Market value</p>
-                <p className="font-medium">${Math.round(result.inputs.marketValue).toLocaleString()}</p>
-              </div>
-              <div className="rounded-xl border bg-slate-50 p-3">
-                <p className="text-slate-500">Tax rate</p>
-                <p className="font-medium">{(result.inputs.taxRate * 100).toFixed(2)}%</p>
-              </div>
-            </div>
-            <p className="mt-2 text-xs text-slate-500">{result.disclaimer}</p>
-
-            {/* lead fields */}
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <div className="sm:col-span-2 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg border bg-white p-2">
-                  <input
-                    type="email"
-                    placeholder="Email to send full report"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full outline-none"
-                  />
-                </div>
-                <div className="rounded-lg border bg-white p-2">
-                  <input type="tel" placeholder="Phone (optional)" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full outline-none" />
-                </div>
-                <input type="text" name="middleName" style={{ display: "none" }} onChange={() => {}} />
-                <label className="col-span-2 mt-1 flex items-center gap-2 text-xs text-slate-600">
-                  <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-                  I agree to be contacted about my estimate. No spam—just results.
-                </label>
-              </div>
-              <div className="flex items-start justify-end">
-                <Button onClick={submitLead} className="rounded-full px-5" disabled={!email || loading}>
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Email me the full report"}
-                </Button>
-              </div>
-            </div>
-
-            {/* book now CTA */}
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs text-emerald-700">
-                <ShieldCheck className="h-4 w-4" /> No upfront fees
-              </span>
-              <Button variant="outline" className="rounded-full" onClick={() => onBook({ email, address, ptype })}>
-                Book Free Consultation
-              </Button>
-            </div>
+            <Button className="rounded-lg" disabled={!email} onClick={submitLead}>Send</Button>
           </div>
-        </motion.div>
-      )}
-
-      {/* Step 3: thanks → push to book */}
-      {step === 3 && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="mt-3 rounded-2xl border bg-white p-5 shadow-sm">
-            <p className="font-serif text-lg">Report on the way ✅</p>
-            <p className="mt-1 text-slate-600">Want to fast-track results? Book a free call.</p>
-            <div className="mt-3 flex gap-2">
-              <Button className="rounded-full" onClick={() => onBook({ email, address, ptype })}>Book Free Consultation</Button>
-              <Button variant="outline" className="rounded-full" onClick={() => setStep(1)}>Check another address</Button>
-            </div>
-          </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );
 }
 
-/* ========================= HERO ========================= */
+/* ================================== HERO ================================== */
 function Hero({ onOpenBook }: { onOpenBook: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [0, 80]);
+
   return (
     <section ref={ref} className="relative isolate overflow-hidden pt-24">
-      {/* BG Visual */}
+      {/* BG */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_70%_-10%,rgba(59,130,246,0.35),transparent),radial-gradient(50%_50%_at_20%_10%,rgba(99,102,241,0.35),transparent)]" />
         <Image
@@ -347,13 +178,8 @@ function Hero({ onOpenBook }: { onOpenBook: () => void }) {
             </Button>
           </motion.div>
 
-          {/* Estimator */}
           <motion.div variants={item} className="mt-6 max-w-xl">
-            <AddressEstimator
-              onBook={(prefill) => {
-                window.dispatchEvent(new CustomEvent("open-book", { detail: prefill }));
-              }}
-            />
+            <AddressEstimator onBook={onOpenBook} />
           </motion.div>
 
           <motion.div variants={item} className="mt-8 grid w-full max-w-xl grid-cols-2 gap-4 text-sm text-slate-600">
@@ -379,7 +205,7 @@ function Hero({ onOpenBook }: { onOpenBook: () => void }) {
         </motion.div>
       </motion.div>
 
-      {/* trust bar */}
+      {/* trust strip */}
       <div className="border-t bg-white/70">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 px-4 py-4 sm:grid-cols-3 md:px-6">
           <div className="flex items-center gap-2 text-sm text-slate-600"><Award className="h-4 w-4" /> Top-rated client satisfaction</div>
@@ -391,8 +217,8 @@ function Hero({ onOpenBook }: { onOpenBook: () => void }) {
   );
 }
 
-/* ===================== PRACTICE AREAS → RESPONSIVE CAROUSEL ===================== */
-const AREAS = [
+/* =================== SERVICES: ONE-BY-ONE LOOPING SLIDER =================== */
+const SERVICES = [
   {
     icon: <Gavel className="h-6 w-6" />,
     title: "Credit Card Debt & Collections",
@@ -408,7 +234,7 @@ const AREAS = [
     bullets: ["Aggressive comps", "Hearing representation", "Annual re-checks"],
   },
   {
-    icon: <ShieldCheck className="h-6 w-6" />,
+    icon: <Stethoscope className="h-6 w-6" />,
     title: "Medical Bills & Healthcare Costs",
     desc: "Audit CPT codes, catch duplicates & denials, negotiate direct with providers.",
     href: "/services/medical-bills",
@@ -422,9 +248,9 @@ const AREAS = [
     bullets: ["CAM audits", "Rent comps", "Renewal strategy"],
   },
   {
-    icon: <FileCheck2 className="h-6 w-6" />,
+    icon: <FileCheck className="h-6 w-6" />,
     title: "Contracts & Commercial",
-    desc: "Vendor contract reviews—pricing benchmarks, scope clarity, termination leverage.",
+    desc: "Vendor contracts—pricing benchmarks, scope clarity, termination leverage.",
     href: "/services/contracts",
     bullets: ["Benchmark pricing", "SLA enforcement", "Exit clauses"],
   },
@@ -444,50 +270,20 @@ const AREAS = [
   },
 ];
 
-function PracticeAreas() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
-  const items = useMemo(() => AREAS, []);
+function ServicesSlider() {
+  const items = useMemo(() => SERVICES, []);
+  const [idx, setIdx] = useState(0);
 
-  const snapTo = (i: number) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const clamped = Math.max(0, Math.min(i, items.length - 1));
-    const child = track.children[clamped] as HTMLElement | undefined;
-    if (child) {
-      track.scrollTo({ left: child.offsetLeft - track.offsetLeft, behavior: "smooth" });
-      setIndex(clamped);
-    }
-  };
-
-  const prev = () => snapTo(index - 1);
-  const next = () => snapTo(index + 1);
-
+  // autoplay one-by-one loop
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
+    const id = setInterval(() => setIdx(i => (i + 1) % items.length), 4500);
+    return () => clearInterval(id);
+  }, [items.length]);
 
-    let rAF: number | null = null;
-    const onScroll = () => {
-      if (rAF) cancelAnimationFrame(rAF);
-      rAF = requestAnimationFrame(() => {
-        const { scrollLeft } = track;
-        let best = 0;
-        let bestDist = Infinity;
-        for (let i = 0; i < track.children.length; i++) {
-          const el = track.children[i] as HTMLElement;
-          const dist = Math.abs(el.offsetLeft - scrollLeft);
-          if (dist < bestDist) { best = i; bestDist = dist; }
-        }
-        setIndex(best);
-      });
-    };
-    track.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      track.removeEventListener("scroll", onScroll);
-      if (rAF) cancelAnimationFrame(rAF);
-    };
-  }, []);
+  const prev = () => setIdx(i => (i - 1 + items.length) % items.length);
+  const next = () => setIdx(i => (i + 1) % items.length);
+
+  const active = items[idx];
 
   return (
     <section className="bg-gradient-to-b from-white to-slate-50 py-20">
@@ -498,124 +294,80 @@ function PracticeAreas() {
           <p className="mt-3 text-slate-600">Precise analysis. Aggressive negotiation. Ethical practice.</p>
         </div>
 
-        {/* Carousel Shell */}
-        <div className="relative mt-10">
-          {/* Prev / Next */}
-          <div className="pointer-events-none absolute -top-12 right-0 flex gap-2 sm:top-1/2 sm:-translate-y-1/2 sm:right-2">
-            <button
-              onClick={prev}
-              className="pointer-events-auto hidden rounded-full border bg-white px-3 py-2 text-slate-700 shadow-sm transition hover:bg-slate-50 sm:inline-flex"
-              aria-label="Previous services"
-              disabled={index === 0}
-            >
+        {/* slider */}
+        <div className="relative mx-auto mt-10 max-w-3xl">
+          <div className="absolute -left-3 top-1/2 -translate-y-1/2">
+            <button onClick={prev} className="rounded-full border bg-white p-2 shadow-sm hover:bg-slate-50" aria-label="Previous service">
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <button
-              onClick={next}
-              className="pointer-events-auto hidden rounded-full border bg-white px-3 py-2 text-slate-700 shadow-sm transition hover:bg-slate-50 sm:inline-flex"
-              aria-label="Next services"
-              disabled={index >= items.length - 1}
-            >
+          </div>
+          <div className="absolute -right-3 top-1/2 -translate-y-1/2">
+            <button onClick={next} className="rounded-full border bg-white p-2 shadow-sm hover:bg-slate-50" aria-label="Next service">
               <ChevronRight className="h-5 w-5" />
             </button>
           </div>
 
-          {/* Track */}
-          <div
-            ref={trackRef}
-            role="region"
-            aria-label="Service categories"
-            className="
-              group/carousel
-              -mx-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-3 pb-2
-              [scrollbar-width:none]
-            "
-            style={{ scrollBehavior: "smooth" }}
-          >
-            <style
-              dangerouslySetInnerHTML={{
-                __html: ".group\\/carousel::-webkit-scrollbar{display:none}",
-              }}
-            />
-            {items.map((a) => (
+          <div className="relative h-[320px]">
+            <AnimatePresence mode="wait">
               <motion.article
-                key={a.href}
-                whileHover={{ y: -6 }}
-                className="
-                  snap-start shrink-0
-                  w-[85%]
-                  sm:w-[48%]
-                  lg:w-[31.5%]
-                  xl:w-[23.5%]
-                  relative overflow-hidden rounded-2xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-lg
-                "
-                aria-roledescription="slide"
-                aria-label={a.title}
+                key={active.href}
+                initial={{ opacity: 0, x: 60 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -60 }}
+                transition={{ type: "spring", stiffness: 220, damping: 26 }}
+                className="absolute inset-0 overflow-hidden rounded-2xl border bg-white p-6 shadow-sm"
               >
-                <div className="absolute inset-0 -z-10 bg-[radial-gradient(40%_40%_at_20%_-10%,rgba(99,102,241,.12),transparent)] opacity-0 transition-opacity hover:opacity-100" />
+                <div className="absolute inset-0 -z-10 bg-[radial-gradient(40%_40%_at_20%_-10%,rgba(99,102,241,.12),transparent)]" />
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                  {a.icon}
+                  {active.icon}
                 </div>
-                <h3 className="mt-4 font-serif text-xl text-slate-900">{a.title}</h3>
-                <p className="mt-2 text-sm text-slate-600">{a.desc}</p>
-
-                {a.bullets && (
-                  <ul className="mt-3 space-y-1 text-sm text-slate-600">
-                    {a.bullets.map((b, j) => (
-                      <li key={j} className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                <div className="mt-5 flex items-center justify-between">
-                  <Link
-                    href={a.href}
-                    className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700"
-                    aria-label={`Learn more about ${a.title}`}
-                  >
-                    Learn more
-                    <ChevronRight className="ml-1 h-4 w-4" />
+                <h3 className="mt-4 font-serif text-xl text-slate-900">{active.title}</h3>
+                <p className="mt-2 text-sm text-slate-600">{active.desc}</p>
+                <ul className="mt-3 space-y-1 text-sm text-slate-600">
+                  {active.bullets?.map((b, j) => (
+                    <li key={j} className="flex items-start gap-2">
+                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-5">
+                  <Link href={active.href} className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                    Learn more <ChevronRight className="ml-1 h-4 w-4" />
                   </Link>
-                  <Button asChild size="sm" className="rounded-full">
-                    <Link href="/contact" aria-label={`Get help with ${a.title}`}>
-                      Get help
-                    </Link>
-                  </Button>
                 </div>
               </motion.article>
-            ))}
+            </AnimatePresence>
           </div>
 
-          {/* Dots */}
-          <div className="mt-4 flex items-center justify-center gap-2">
-            {items.map((_, iDot) => (
+          {/* dots */}
+          <div className="mt-6 flex items-center justify-center gap-2">
+            {items.map((_, i) => (
               <button
-                key={iDot}
-                onClick={() => snapTo(iDot)}
-                aria-label={`Go to slide ${iDot + 1}`}
-                className={`h-2.5 w-2.5 rounded-full transition ${
-                  iDot === index ? "bg-indigo-600" : "bg-slate-300 hover:bg-slate-400"
-                }`}
+                key={i}
+                onClick={() => setIdx(i)}
+                aria-label={`Go to ${i + 1}`}
+                className={`h-2.5 w-2.5 rounded-full transition ${i === idx ? "bg-indigo-600" : "bg-slate-300 hover:bg-slate-400"}`}
               />
             ))}
           </div>
-        </div>
 
-        {/* Section CTA */}
-        <div className="mt-10 text-center">
-          <Button asChild className="rounded-full px-6">
-            <Link href="/services">See all services</Link>
-          </Button>
+          {/* section CTAs */}
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <Button asChild className="rounded-full px-6">
+              <Link href="/services">See all services</Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full px-6">
+              <Link href="/contact">Get help</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-/* ===================== RESULTS HIGHLIGHTS ===================== */
+/* ============================ RESULTS STRIP ============================ */
 const RESULTS = [
   { k: "$88,400", t: "Medical bill reduction" },
   { k: "$41,200", t: "Commercial property tax win" },
@@ -630,7 +382,7 @@ function Marquee() {
       <div className="animate-[marquee_22s_linear_infinite] whitespace-nowrap py-2 text-sm text-slate-600 [--gap:3rem]">
         {[...RESULTS, ...RESULTS].map((r, i) => (
           <span key={i} className="mx-[--gap] inline-flex items-center">
-            <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-600" /> {r.k} — {r.t}
+            <ClipboardCheck className="mr-2 h-4 w-4 text-emerald-600" /> {r.k} — {r.t}
           </span>
         ))}
       </div>
@@ -662,7 +414,7 @@ function ResultsStrip() {
   );
 }
 
-/* ========================= TESTIMONIALS ========================= */
+/* ================================ TESTIMONIALS ================================ */
 function Testimonials() {
   const quotes = [
     { name: "R.M., Chicago", text: "They reduced my hospital bill by more than half and explained every step. Zero pressure, only results." },
@@ -696,42 +448,28 @@ function Testimonials() {
   );
 }
 
-/* ======================= PROCESS + INDUSTRIES ======================= */
-function Process() {
-  const steps = [
-    { icon: <Phone className="h-5 w-5" />, t: "Free case review", d: "Share documents securely; we assess opportunities fast." },
-    { icon: <MessageSquare className="h-5 w-5" />, t: "Strategy & authorization", d: "Clear plan; you approve before we act." },
-    { icon: <ShieldCheck className="h-5 w-5" />, t: "Negotiate & resolve", d: "We coordinate with agencies, hospitals, and tax bodies." },
-    { icon: <Sparkles className="h-5 w-5" />, t: "You save", d: "Pay only from realized savings. No surprises." },
+/* ==================== “YOUR CASE TEAM, ON DAY ONE” (no photos) ==================== */
+function CaseTeam() {
+  const blocks = [
+    { h: "Attorney-led strategy", d: "Risk-aware game plan aligned to outcomes and jurisdictional rules.", icon: <ShieldCheck className="h-5 w-5" /> },
+    { h: "Analyst audit", d: "Line-item review, comps, CPT/HCPCS checks, and valuation models.", icon: <ClipboardCheck className="h-5 w-5" /> },
+    { h: "Negotiator on point", d: "Relentless but professional contact with providers, agencies, and boards.", icon: <Handshake className="h-5 w-5" /> },
+    { h: "Weekly updates", d: "Transparent timelines; you approve moves before we act.", icon: <Clock4 className="h-5 w-5" /> },
   ];
   return (
     <section className="bg-slate-50 py-16">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="kicker text-indigo-600">How it works</p>
-          <h2 className="font-serif text-3xl text-slate-900">Simple, secure, effective</h2>
+          <p className="kicker text-indigo-600">Your team</p>
+          <h2 className="font-serif text-3xl text-slate-900 md:text-4xl">Your case team, on day one</h2>
+          <p className="mt-3 text-slate-600">No headshots. Real roles that move your matter forward—immediately.</p>
         </div>
-        <ol className="mt-10 grid gap-6 md:grid-cols-4">
-          {steps.map((s, i) => (
-            <li key={i} className="rounded-2xl border bg-white p-6 shadow-sm">
-              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">{s.icon}</div>
-              <p className="font-medium text-slate-900">{i + 1}. {s.t}</p>
-              <p className="mt-2 text-sm text-slate-600">{s.d}</p>
-            </li>
-          ))}
-        </ol>
-
-        {/* Industries we help */}
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            { icon: <Building className="h-5 w-5" />, title: "Homeowners & HOAs", text: "Primary residences, second homes, investment properties." },
-            { icon: <Building2 className="h-5 w-5" />, title: "Commercial Owners", text: "Retail, hospitality, healthcare, industrial & office." },
-            { icon: <Handshake className="h-5 w-5" />, title: "Startups & SMBs", text: "Cash-flow friendly fee model aligned to savings." },
-          ].map((b, i) => (
+        <div className="mt-10 grid gap-6 md:grid-cols-4">
+          {blocks.map((b, i) => (
             <div key={i} className="rounded-2xl border bg-white p-6 shadow-sm">
               <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">{b.icon}</div>
-              <p className="font-medium text-slate-900">{b.title}</p>
-              <p className="mt-2 text-sm text-slate-600">{b.text}</p>
+              <p className="font-medium text-slate-900">{b.h}</p>
+              <p className="mt-2 text-sm text-slate-600">{b.d}</p>
             </div>
           ))}
         </div>
@@ -740,51 +478,22 @@ function Process() {
   );
 }
 
-/* ========================= TEAM (snapshot) ========================= */
-function Team() {
-  const people = [
-    { name: "Alexandra Brooks, Esq.", role: "Managing Partner", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop" },
-    { name: "Jordan Lee", role: "Senior Case Analyst", img: "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?q=80&w=800&auto=format&fit=crop" },
-    { name: "Samir Patel", role: "Negotiations Lead", img: "https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=800&auto=format&fit=crop" },
-  ];
-  return (
-    <section id="team" className="bg-white py-20">
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="kicker text-indigo-600">Meet your team</p>
-          <h2 className="font-serif text-3xl text-slate-900 md:text-4xl">Experienced. Precise. Human.</h2>
-          <p className="mt-3 text-slate-600">A cross-functional crew of attorneys, analysts, and negotiators on your side.</p>
-        </div>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {people.map((p, i) => (
-            <Card key={i} className="overflow-hidden transition-shadow hover:shadow-lg">
-              <div className="relative h-56 w-full"><Image src={p.img} alt={p.name} fill className="object-cover" /></div>
-              <CardContent className="p-5">
-                <p className="font-serif text-lg text-slate-900">{p.name}</p>
-                <p className="text-sm text-slate-600">{p.role}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <div className="mt-10 text-center">
-          <Button asChild variant="outline" className="rounded-full"><Link href="/contact">Talk to our team</Link></Button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ========================= FAQ PREVIEW ========================= */
-function FAQPreview() {
+/* =================================== FAQ =================================== */
+function FAQSection() {
   const faqs = [
-    { q: "Do I pay anything upfront?", a: "No. Our fee comes only from the savings we secure for you. If we don’t save you money, you owe us nothing." },
-    { q: "How long does a typical case take?", a: "Most matters resolve in weeks, not months. Complex cases can take longer, but we keep you updated at every step." },
-    { q: "Is my data secure?", a: "Yes. We operate with HIPAA/PCI-aware workflows, encrypted intake, and least-privilege access controls." },
+    { q: "Do I pay anything upfront?", a: "For savings matters (property tax, medical bill reductions, many collections) there are no upfront fees—our compensation comes from the savings we secure. For other engagements we use transparent flat or clearly-scoped fees." },
+    { q: "How long does a typical case take?", a: "Many matters resolve within weeks. Appeals tied to government calendars can take longer; we set expectations on day one and provide weekly updates." },
+    { q: "Will this hurt my credit?", a: "Our approach is credit-aware. When supported by law and evidence we pursue deletions or corrected reporting. We never advise steps that jeopardize critical credit goals." },
+    { q: "Is my information secure?", a: "Yes. We use encrypted document intake, least-privilege access, and HIPAA/PCI-aware workflows." },
+    { q: "Can you work outside my state?", a: "We cover many U.S. markets directly and collaborate with local counsel when required by practice rules—seamlessly for you." },
+    { q: "What happens in the free case review?", a: "You share documents securely. We map savings/risk, timelines, and pricing options. You decide if/when to proceed—no pressure." },
+    { q: "How do you measure success?", a: "Documented savings, corrected reporting, and friction removed. Every engagement ends with a summary of outcomes in writing." },
+    { q: "What if you don’t save me money?", a: "Then you don’t owe us a success-based fee. Simple as that." },
   ];
   const [open, setOpen] = useState<number | null>(0);
   return (
     <section className="bg-white py-16">
-      <div className="mx-auto max-w-3xl px-4 md:px-6">
+      <div className="mx-auto max-w-4xl px-4 md:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="kicker text-indigo-600">Questions</p>
           <h2 className="font-serif text-3xl text-slate-900 md:text-4xl">FAQ</h2>
@@ -796,7 +505,7 @@ function FAQPreview() {
               <div key={i} className="overflow-hidden rounded-xl border bg-white">
                 <button className="flex w-full items-center justify-between px-4 py-4 text-left" onClick={() => setOpen(isOpen ? null : i)}>
                   <span className="font-medium text-slate-900">{f.q}</span>
-                  {isOpen ? <Minus className="h-5 w-5 text-slate-500" /> : <Plus className="h-5 w-5 text-slate-500" />}
+                  {isOpen ? <ChevronLeft className="h-5 w-5 rotate-90 text-slate-500" /> : <ChevronRight className="h-5 w-5 text-slate-500" />}
                 </button>
                 {isOpen && <div className="px-4 pb-4 text-slate-600">{f.a}</div>}
               </div>
@@ -804,15 +513,15 @@ function FAQPreview() {
           })}
         </div>
         <div className="mt-8 text-center">
-          <Button asChild className="rounded-full"><Link href="/faq">See all FAQs</Link></Button>
+          <Button asChild className="rounded-full"><Link href="/contact">Still have questions? Talk to us</Link></Button>
         </div>
       </div>
     </section>
   );
 }
 
-/* ========================= CONTACT SNAPSHOT ========================= */
-function Contact() {
+/* ============================== CONTACT (refined) ============================== */
+function ContactSection() {
   return (
     <section className="relative bg-white py-20">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-4 md:grid-cols-2 md:px-6">
@@ -821,14 +530,31 @@ function Contact() {
           <h2 className="font-serif text-3xl text-slate-900">Have questions or ready to start saving?</h2>
           <p className="mt-3 text-slate-600">Reach out—no pressure, no upfront fees. Just honest guidance and real results.</p>
 
-          <div className="mt-8 grid gap-4 text-slate-700">
-            <div className="flex items-center gap-3"><Phone className="h-5 w-5 text-indigo-600" /> (312) 488-9775</div>
-            <div className="flex items-center gap-3"><Mail className="h-5 w-5 text-indigo-600" /> info@cumberlandbrooks.com</div>
-            <div className="flex items-center gap-3"><MapPin className="h-5 w-5 text-indigo-600" /> 752 S. 6th St., Ste. R, Las Vegas, NV 89101</div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border bg-slate-50 p-4">
+              <p className="text-sm text-slate-600">Call</p>
+              <a className="mt-1 block text-lg font-medium text-slate-900" href="tel:+13124889775">
+                <span className="inline-flex items-center gap-2"><Phone className="h-4 w-4 text-indigo-600" /> (312) 488-9775</span>
+              </a>
+              <p className="text-xs text-slate-500">Weekdays 9–6 (CT)</p>
+            </div>
+            <div className="rounded-2xl border bg-slate-50 p-4">
+              <p className="text-sm text-slate-600">Email</p>
+              <a className="mt-1 block text-lg font-medium text-slate-900" href="mailto:info@cumberlandbrooks.com">
+                <span className="inline-flex items-center gap-2"><Mail className="h-4 w-4 text-indigo-600" /> info@cumberlandbrooks.com</span>
+              </a>
+              <p className="text-xs text-slate-500">Replies within 1 business day</p>
+            </div>
+            <div className="rounded-2xl border bg-slate-50 p-4 sm:col-span-2">
+              <p className="text-sm text-slate-600">Office</p>
+              <p className="mt-1 text-slate-900"><span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-indigo-600" /> 752 S. 6th St., Ste. R, Las Vegas, NV 89101</span></p>
+              <p className="text-xs text-slate-500">By appointment only</p>
+            </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 flex gap-3">
             <Button asChild className="rounded-full"><Link href="/contact">Open contact page</Link></Button>
+            <Button asChild variant="outline" className="rounded-full"><Link href="/results">See results</Link></Button>
           </div>
         </div>
 
@@ -848,53 +574,23 @@ function Contact() {
   );
 }
 
-/* ========================= STICKY CTA (auto-offset to avoid overlap) ========================= */
+/* ========================= STICKY CTA (no Navbar/Footer here) ========================= */
 function StickyCTA({ onOpenBook }: { onOpenBook: () => void }) {
   const [show, setShow] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  // show after scroll
   useEffect(() => {
     const onScroll = () => setShow(window.scrollY > 500);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  // measure its height and set CSS var so footer/layout can reserve space
-  useEffect(() => {
-    const el = ref.current;
-    if (!show || !el) {
-      document.documentElement.style.removeProperty("--sticky-offset");
-      document.documentElement.classList.remove("has-sticky");
-      return;
-    }
-    const update = () => {
-      const h = el.offsetHeight + 16; // add gap for shadow
-      document.documentElement.style.setProperty("--sticky-offset", `${h}px`);
-      document.documentElement.classList.add("has-sticky");
-    };
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    window.addEventListener("resize", update);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", update);
-      document.documentElement.style.removeProperty("--sticky-offset");
-      document.documentElement.classList.remove("has-sticky");
-    };
-  }, [show]);
-
   if (!show) return null;
-
   return (
-    <div ref={ref} className="fixed inset-x-0 bottom-3 z-50 flex justify-center px-3" role="region" aria-label="Quick actions">
+    <div className="fixed inset-x-0 bottom-3 z-50 flex justify-center px-3" role="region" aria-label="Quick actions">
       <div className="flex w-full max-w-3xl items-center justify-between gap-3 rounded-full border bg-white/90 p-2 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="px-3 text-sm text-slate-700">No upfront fees. Average resolution in weeks.</div>
         <div className="flex items-center gap-2">
           <a href="tel:+13124889775" className="hidden rounded-full border px-4 py-2 text-sm text-slate-800 transition-colors hover:bg-slate-50 sm:block" aria-label="Call (312) 488-9775">
-            <span className="inline-flex items-center gap-1"><Phone className="h-4 w-4" /> (312) 488-9775</span>
+            (312) 488-9775
           </a>
           <Button onClick={onOpenBook} className="rounded-full">Book Free Consultation</Button>
         </div>
@@ -903,28 +599,20 @@ function StickyCTA({ onOpenBook }: { onOpenBook: () => void }) {
   );
 }
 
-/* ========================= PAGE ========================= */
+/* ================================= PAGE ================================= */
 export default function Page() {
   const [drawer, setDrawer] = useState(false);
   const [prefill, setPrefill] = useState<{ name?: string; email?: string; address?: string; ptype?: "residential" | "commercial"; }>();
 
-  useEffect(() => {
-    const handler = (e: any) => { setPrefill(e.detail); setDrawer(true); };
-    window.addEventListener("open-book" as any, handler);
-    return () => window.removeEventListener("open-book" as any, handler);
-  }, []);
-
   return (
-    <main className="text-slate-800" style={{ paddingBottom: "var(--sticky-offset, 0px)" }}>
-
+    <main className="text-slate-800">
       <Hero onOpenBook={() => setDrawer(true)} />
-      <PracticeAreas />
+      <ServicesSlider />
       <ResultsStrip />
       <Testimonials />
-      <Process />
-      <Team />
-      <FAQPreview />
-      <Contact />
+      <CaseTeam />
+      <FAQSection />
+      <ContactSection />
       <StickyCTA onOpenBook={() => setDrawer(true)} />
       <BookDrawer open={drawer} onOpenChange={setDrawer} prefill={prefill} />
     </main>
