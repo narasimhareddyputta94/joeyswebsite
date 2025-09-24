@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Got it 🚀 — here’s the **all-in-one README.md** (already polished, with badges, features, setup, deploy, and About).
+Just copy → paste → commit ✅
 
-## Getting Started
+````markdown
+# ⚖️ Cumberland Brooks, LLC – Web App  
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)  
+![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.0-38B2AC?logo=tailwind-css&logoColor=white)  
+![pnpm](https://img.shields.io/badge/pnpm-fast-yellow?logo=pnpm)  
+![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)  
+
+Modern Next.js 14+ application for **Cumberland Brooks, LLC** — expert negotiators delivering **real savings with no upfront fees**.  
+Built with [Next.js](https://nextjs.org), [Tailwind CSS](https://tailwindcss.com), and [shadcn/ui](https://ui.shadcn.com).  
+
+---
+
+## 🌟 Features
+
+- ⚡ **Next.js 14 App Router** with TypeScript  
+- 🎨 **Tailwind CSS** + shadcn/ui components  
+- 📱 Fully responsive, mobile-first design  
+- 🔒 Secure intake (**HIPAA/PCI-aware**)  
+- 📅 Integrated **Calendly booking**  
+- 🧾 Address-based **tax estimator widget**  
+- 🧩 Modular pages: Services, Results, About, Team, Contact  
+- 💡 SEO optimized (OpenGraph + Schema.org markup)  
+
+---
+
+## 🚀 Getting Started
+
+Clone repo & install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+git clone <your-repo-url>
+cd your-repo
+pnpm install
+# or npm install / yarn install / bun install
+````
+
+Run the dev server:
+
+```bash
 pnpm dev
-# or
-bun dev
+# or npm run dev / yarn dev / bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit 👉 [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Edit `app/page.tsx` or any route in `app/` → browser hot-reloads instantly.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛠️ Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+ ├─ app/               # Next.js routes
+ │   ├─ services/      # Service pages (business, contracts, real estate, etc.)
+ │   ├─ results/       # Case wins & outcomes
+ │   ├─ about/         # About & mission
+ │   ├─ contact/       # Contact form + Calendly booking
+ │   └─ layout.tsx     # Global layout (Navbar, TrustBar, Footer)
+ ├─ components/        # Shared UI
+ │   ├─ Navbar.tsx
+ │   ├─ Footer.tsx
+ │   ├─ TrustBar.tsx   # scrolling assurance messages
+ │   └─ CTASticky.tsx
+ └─ styles/            # Global styles
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📦 Deployment
 
-## Deploy on Vercel
+Deploy on [Vercel](https://vercel.com) in seconds:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push repo → GitHub
+2. Import repo into Vercel
+3. Add env variables (e.g., Google Maps API key)
+4. Click **Deploy** 🚀
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📖 Docs: [Next.js Deployment Guide](https://nextjs.org/docs/app/building-your-application/deploying)
+
+---
+
+## 📚 Learn More
+
+* [Next.js Docs](https://nextjs.org/docs) – API & features
+* [Learn Next.js](https://nextjs.org/learn) – hands-on tutorial
+* [shadcn/ui](https://ui.shadcn.com) – headless UI components
+
+---
+
+## 👥 Contributors
+
+* **Narasimha Reddy Putta** (Lead Developer)
+* Contributions welcome → PRs & Issues 💡
+
+---
+
+## 🏛️ About Cumberland Brooks, LLC
+
+We help clients **cut medical bills, reduce property taxes, and resolve collections**.
+Our fee model is simple: **you only pay when we save you money**.
+
+👉 [📅 Book a Free Consultation](https://calendly.com/narasimhareddyputta999/15min)
+
+---
+
+✨ Built with precision, clarity, and relentless advocacy.
+
+```
+
+---
+
+do you also want me to **add screenshots (About, Contact, Services pages)** into this README so it looks like a product showcase?
+```
