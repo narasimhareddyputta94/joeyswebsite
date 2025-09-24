@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader } from "@googlemaps/js-api-loader";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Scale, ShieldCheck, Gavel, MessageSquare, Phone, Users2, Clock4, Sparkles,
-  ChevronRight, CheckCircle2, Award, Briefcase, FileCheck2, Mail, MapPin, Menu,
-  X, Star, Quote, Plus, Minus, Loader2, DollarSign, Building2, Building, Handshake
+  ChevronRight, ChevronLeft, CheckCircle2, Award, Briefcase, FileCheck2, Mail, MapPin, Menu,
+  X, Star, Quote, Plus, Minus, Loader2, DollarSign, Building2, Building, Handshake, LandPlot, Landmark
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,7 +42,6 @@ function BookDrawer({
   // Prefill
   if (prefill?.name) url.searchParams.set("name", prefill.name);
   if (prefill?.email) url.searchParams.set("email", prefill.email);
-  // If you set up custom questions in Calendly, you can read a1/a2 there
   if (prefill?.address) url.searchParams.set("a1", prefill.address);
   if (prefill?.ptype) url.searchParams.set("a2", prefill.ptype);
 
@@ -392,14 +391,104 @@ function Hero({ onOpenBook }: { onOpenBook: () => void }) {
   );
 }
 
-/* ===================== PRACTICE AREAS SNAPSHOT ===================== */
+/* ===================== PRACTICE AREAS → RESPONSIVE CAROUSEL ===================== */
 const AREAS = [
-  { icon: <Gavel className="h-6 w-6" />, title: "Credit Card Debt & Collections", desc: "We fight inaccurate reporting, inflated fees, and aggressive collectors—so you regain control.", href: "/services/collections" },
-  { icon: <Scale className="h-6 w-6" />, title: "Property Tax Appeals (Resi & Commercial)", desc: "From valuation to hearings—our analysts secure the maximum savings.", href: "/services/property-tax" },
-  { icon: <ShieldCheck className="h-6 w-6" />, title: "Medical Bills & Healthcare Costs", desc: "Audits for errors, overcharges, and duplicate fees. We negotiate with providers.", href: "/services/medical-bills" },
+  {
+    icon: <Gavel className="h-6 w-6" />,
+    title: "Credit Card Debt & Collections",
+    desc: "Dispute inaccuracies, stop harassment, negotiate pay-for-delete when viable.",
+    href: "/services/collections",
+    bullets: ["FDCPA/FCRA leverage", "Charge-off settlements", "Credit repair path"],
+  },
+  {
+    icon: <Scale className="h-6 w-6" />,
+    title: "Property Tax Appeals (Resi & Commercial)",
+    desc: "Valuation analysis, comps, and hearing prep to reduce assessed value fast.",
+    href: "/services/property-tax",
+    bullets: ["Aggressive comps", "Hearing representation", "Annual re-checks"],
+  },
+  {
+    icon: <ShieldCheck className="h-6 w-6" />,
+    title: "Medical Bills & Healthcare Costs",
+    desc: "Audit CPT codes, catch duplicates & denials, negotiate direct with providers.",
+    href: "/services/medical-bills",
+    bullets: ["CPT/HCPCS review", "Financial assistance routing", "Provider negotiations"],
+  },
+  {
+    icon: <Building2 className="h-6 w-6" />,
+    title: "Real Estate & Leasing",
+    desc: "CAM reconciliation, lease abstraction, and renewal negotiation to cut costs.",
+    href: "/services/real-estate",
+    bullets: ["CAM audits", "Rent comps", "Renewal strategy"],
+  },
+  {
+    icon: <FileCheck2 className="h-6 w-6" />,
+    title: "Contracts & Commercial",
+    desc: "Vendor contract reviews—pricing benchmarks, scope clarity, termination leverage.",
+    href: "/services/contracts",
+    bullets: ["Benchmark pricing", "SLA enforcement", "Exit clauses"],
+  },
+  {
+    icon: <Landmark className="h-6 w-6" />,
+    title: "Government / Municipal Bills",
+    desc: "Parking, tolls, fines—reduce penalties and set realistic payment plans.",
+    href: "/services/municipal",
+    bullets: ["Penalty reductions", "Plan setup", "Documentation fixes"],
+  },
+  {
+    icon: <LandPlot className="h-6 w-6" />,
+    title: "Utilities & Telecom Disputes",
+    desc: "Back-billing disputes, fee removals, outage credits—across major providers.",
+    href: "/services/utilities",
+    bullets: ["Back-bill audits", "Fee removals", "Outage credits"],
+  },
 ];
 
 function PracticeAreas() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+  const items = useMemo(() => AREAS, []);
+
+  const snapTo = (i: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const clamped = Math.max(0, Math.min(i, items.length - 1));
+    const child = track.children[clamped] as HTMLElement | undefined;
+    if (child) {
+      track.scrollTo({ left: child.offsetLeft - track.offsetLeft, behavior: "smooth" });
+      setIndex(clamped);
+    }
+  };
+
+  const prev = () => snapTo(index - 1);
+  const next = () => snapTo(index + 1);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    let rAF: number | null = null;
+    const onScroll = () => {
+      if (rAF) cancelAnimationFrame(rAF);
+      rAF = requestAnimationFrame(() => {
+        const { scrollLeft } = track;
+        let best = 0;
+        let bestDist = Infinity;
+        for (let i = 0; i < track.children.length; i++) {
+          const el = track.children[i] as HTMLElement;
+          const dist = Math.abs(el.offsetLeft - scrollLeft);
+          if (dist < bestDist) { best = i; bestDist = dist; }
+        }
+        setIndex(best);
+      });
+    };
+    track.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      track.removeEventListener("scroll", onScroll);
+      if (rAF) cancelAnimationFrame(rAF);
+    };
+  }, []);
+
   return (
     <section className="bg-gradient-to-b from-white to-slate-50 py-20">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
@@ -409,18 +498,113 @@ function PracticeAreas() {
           <p className="mt-3 text-slate-600">Precise analysis. Aggressive negotiation. Ethical practice.</p>
         </div>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {AREAS.map((a, i) => (
-            <motion.a key={i} href={a.href} whileHover={{ y: -6 }} className="group relative overflow-hidden rounded-2xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-lg">
-              <div className="absolute inset-0 -z-10 bg-[radial-gradient(40%_40%_at_20%_-10%,rgba(99,102,241,.15),transparent)] opacity-0 transition-opacity group-hover:opacity-100" />
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">{a.icon}</div>
-              <h3 className="mt-4 font-serif text-xl text-slate-900">{a.title}</h3>
-              <p className="mt-2 text-sm text-slate-600">{a.desc}</p>
-              <div className="mt-4 inline-flex items-center text-sm font-medium text-indigo-600">Learn more <ChevronRight className="ml-1 h-4 w-4" /></div>
-            </motion.a>
-          ))}
+        {/* Carousel Shell */}
+        <div className="relative mt-10">
+          {/* Prev / Next */}
+          <div className="pointer-events-none absolute -top-12 right-0 flex gap-2 sm:top-1/2 sm:-translate-y-1/2 sm:right-2">
+            <button
+              onClick={prev}
+              className="pointer-events-auto hidden rounded-full border bg-white px-3 py-2 text-slate-700 shadow-sm transition hover:bg-slate-50 sm:inline-flex"
+              aria-label="Previous services"
+              disabled={index === 0}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              onClick={next}
+              className="pointer-events-auto hidden rounded-full border bg-white px-3 py-2 text-slate-700 shadow-sm transition hover:bg-slate-50 sm:inline-flex"
+              aria-label="Next services"
+              disabled={index >= items.length - 1}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Track */}
+          <div
+            ref={trackRef}
+            role="region"
+            aria-label="Service categories"
+            className="
+              group/carousel
+              -mx-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-3 pb-2
+              [scrollbar-width:none]
+            "
+            style={{ scrollBehavior: "smooth" }}
+          >
+            <style
+              dangerouslySetInnerHTML={{
+                __html: ".group\\/carousel::-webkit-scrollbar{display:none}",
+              }}
+            />
+            {items.map((a) => (
+              <motion.article
+                key={a.href}
+                whileHover={{ y: -6 }}
+                className="
+                  snap-start shrink-0
+                  w-[85%]
+                  sm:w-[48%]
+                  lg:w-[31.5%]
+                  xl:w-[23.5%]
+                  relative overflow-hidden rounded-2xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-lg
+                "
+                aria-roledescription="slide"
+                aria-label={a.title}
+              >
+                <div className="absolute inset-0 -z-10 bg-[radial-gradient(40%_40%_at_20%_-10%,rgba(99,102,241,.12),transparent)] opacity-0 transition-opacity hover:opacity-100" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                  {a.icon}
+                </div>
+                <h3 className="mt-4 font-serif text-xl text-slate-900">{a.title}</h3>
+                <p className="mt-2 text-sm text-slate-600">{a.desc}</p>
+
+                {a.bullets && (
+                  <ul className="mt-3 space-y-1 text-sm text-slate-600">
+                    {a.bullets.map((b, j) => (
+                      <li key={j} className="flex items-start gap-2">
+                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <div className="mt-5 flex items-center justify-between">
+                  <Link
+                    href={a.href}
+                    className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                    aria-label={`Learn more about ${a.title}`}
+                  >
+                    Learn more
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </Link>
+                  <Button asChild size="sm" className="rounded-full">
+                    <Link href="/contact" aria-label={`Get help with ${a.title}`}>
+                      Get help
+                    </Link>
+                  </Button>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+
+          {/* Dots */}
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {items.map((_, iDot) => (
+              <button
+                key={iDot}
+                onClick={() => snapTo(iDot)}
+                aria-label={`Go to slide ${iDot + 1}`}
+                className={`h-2.5 w-2.5 rounded-full transition ${
+                  iDot === index ? "bg-indigo-600" : "bg-slate-300 hover:bg-slate-400"
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
+        {/* Section CTA */}
         <div className="mt-10 text-center">
           <Button asChild className="rounded-full px-6">
             <Link href="/services">See all services</Link>
@@ -664,23 +848,52 @@ function Contact() {
   );
 }
 
-
-
-/* ========================= STICKY CTA ========================= */
+/* ========================= STICKY CTA (auto-offset to avoid overlap) ========================= */
 function StickyCTA({ onOpenBook }: { onOpenBook: () => void }) {
   const [show, setShow] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // show after scroll
   useEffect(() => {
     const onScroll = () => setShow(window.scrollY > 500);
-    window.addEventListener("scroll", onScroll);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // measure its height and set CSS var so footer/layout can reserve space
+  useEffect(() => {
+    const el = ref.current;
+    if (!show || !el) {
+      document.documentElement.style.removeProperty("--sticky-offset");
+      document.documentElement.classList.remove("has-sticky");
+      return;
+    }
+    const update = () => {
+      const h = el.offsetHeight + 16; // add gap for shadow
+      document.documentElement.style.setProperty("--sticky-offset", `${h}px`);
+      document.documentElement.classList.add("has-sticky");
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+      document.documentElement.style.removeProperty("--sticky-offset");
+      document.documentElement.classList.remove("has-sticky");
+    };
+  }, [show]);
+
   if (!show) return null;
+
   return (
-    <div className="fixed inset-x-0 bottom-3 z-50 flex justify-center px-3">
-      <div className="flex w-full max-w-3xl items-center justify-between gap-3 rounded-full border bg-white/90 p-2 shadow-lg backdrop-blur">
+    <div ref={ref} className="fixed inset-x-0 bottom-3 z-50 flex justify-center px-3" role="region" aria-label="Quick actions">
+      <div className="flex w-full max-w-3xl items-center justify-between gap-3 rounded-full border bg-white/90 p-2 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="px-3 text-sm text-slate-700">No upfront fees. Average resolution in weeks.</div>
         <div className="flex items-center gap-2">
-          <a href="tel:+13124889775" className="hidden rounded-full border px-4 py-2 text-sm text-slate-800 hover:bg-slate-50 sm:block">
+          <a href="tel:+13124889775" className="hidden rounded-full border px-4 py-2 text-sm text-slate-800 transition-colors hover:bg-slate-50 sm:block" aria-label="Call (312) 488-9775">
             <span className="inline-flex items-center gap-1"><Phone className="h-4 w-4" /> (312) 488-9775</span>
           </a>
           <Button onClick={onOpenBook} className="rounded-full">Book Free Consultation</Button>
@@ -702,7 +915,8 @@ export default function Page() {
   }, []);
 
   return (
-    <main className="text-slate-800">
+    <main className="text-slate-800" style={{ paddingBottom: "var(--sticky-offset, 0px)" }}>
+
       <Hero onOpenBook={() => setDrawer(true)} />
       <PracticeAreas />
       <ResultsStrip />

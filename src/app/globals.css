@@ -45,6 +45,8 @@
 
 :root {
   --radius: 0.625rem;
+
+  /* Light theme tokens */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -76,6 +78,9 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* default sticky offset (updated by JS when sticky CTA mounts) */
+  --sticky-offset: 0px;
 }
 
 .dark {
@@ -118,7 +123,51 @@
   }
   body {
     @apply bg-background text-foreground;
-    
   }
 }
 
+/* ================= Sticky CTA: reserve space when present ================= */
+.has-sticky body,
+.has-sticky #__next {
+  padding-bottom: var(--sticky-offset, 0px);
+}
+
+/* iOS safe-area friendly */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .has-sticky body,
+  .has-sticky #__next {
+    padding-bottom: calc(var(--sticky-offset, 0px) + env(safe-area-inset-bottom));
+  }
+}
+
+/* ================= Utilities & tiny design tokens ================= */
+@layer utilities {
+  /* small uppercase "section kicker" used in headings */
+  .kicker {
+    @apply text-xs font-medium uppercase tracking-wider;
+  }
+
+  /* hide scrollbars (Firefox/Chromium/WebKit) */
+  .no-scrollbar {
+    -ms-overflow-style: none;       /* IE/Edge */
+    scrollbar-width: none;          /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  /* helper: apply sticky padding via class (optional) */
+  .pb-sticky {
+    padding-bottom: var(--sticky-offset, 0px);
+  }
+}
+
+/* ================= Motion / accessibility ================= */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within { scroll-behavior: auto; }
+  .marquee, [class*="animate-"] { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+}
+
+/* ================= Marquee keyframes (used for results strip) ================= */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
