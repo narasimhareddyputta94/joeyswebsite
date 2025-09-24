@@ -1,7 +1,3 @@
-Got it 🚀 — here’s the **all-in-one README.md** (already polished, with badges, features, setup, deploy, and About).
-Just copy → paste → commit ✅
-
-````markdown
 # ⚖️ Cumberland Brooks, LLC – Web App  
 
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)  
@@ -9,21 +5,53 @@ Just copy → paste → commit ✅
 ![pnpm](https://img.shields.io/badge/pnpm-fast-yellow?logo=pnpm)  
 ![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)  
 
-Modern Next.js 14+ application for **Cumberland Brooks, LLC** — expert negotiators delivering **real savings with no upfront fees**.  
+> **Modern client-first platform for Cumberland Brooks, LLC** – expert negotiators delivering **real savings with zero upfront fees**.  
+
 Built with [Next.js](https://nextjs.org), [Tailwind CSS](https://tailwindcss.com), and [shadcn/ui](https://ui.shadcn.com).  
 
 ---
 
-## 🌟 Features
+## 🌟 Key Features
 
-- ⚡ **Next.js 14 App Router** with TypeScript  
-- 🎨 **Tailwind CSS** + shadcn/ui components  
-- 📱 Fully responsive, mobile-first design  
-- 🔒 Secure intake (**HIPAA/PCI-aware**)  
-- 📅 Integrated **Calendly booking**  
-- 🧾 Address-based **tax estimator widget**  
-- 🧩 Modular pages: Services, Results, About, Team, Contact  
-- 💡 SEO optimized (OpenGraph + Schema.org markup)  
+- ⚡ **Next.js 14 App Router** + TypeScript  
+- 🎨 **Tailwind CSS** + polished shadcn/ui components  
+- 📱 **Responsive** mobile-first design  
+- 🔒 Secure intake forms (**HIPAA / PCI aware**)  
+- 📅 Seamless **Calendly booking** integration  
+- 🧾 Address-based **property tax estimator widget**  
+- 🧩 Modular pages (Services, Results, About, Contact, Team)  
+- 💡 SEO-optimized with **OpenGraph + Schema.org**  
+
+---
+
+## 🖼️ Product Showcase
+
+| Home Page | Services Page | Contact Form |
+|-----------|---------------|--------------|
+| ![Home Screenshot](docs/screenshots/home.png) | ![Services Screenshot](docs/screenshots/services.png) | ![Contact Screenshot](docs/screenshots/contact.png) |
+
+*(Add your own screenshots inside `/docs/screenshots/` to bring this section alive.)*
+
+---
+
+## 🏗️ Tech Stack Diagram
+
+```mermaid
+graph TD
+    A[👨‍💻 User Browser] -->|HTTPS| B[⚡ Next.js 14 App Router]
+    B --> C[🎨 Tailwind + shadcn/ui Components]
+    B --> D[📅 Calendly Embed]
+    B --> E[🧾 Tax Estimator Widget]
+    B --> F[🔒 Secure Intake Forms]
+
+    B -->|Deployed| G[(▲ Vercel Hosting)]
+    G --> H[(🌐 Domain: cumberlandbrooks.com)]
+
+    F --> I[(🔐 Secure Backend APIs)]
+    I --> J[(📊 External Services e.g. Google Maps API)]
+```
+
+> Visual of how **users interact** with the app → rendered by Next.js → deployed on Vercel → powered by secure APIs + integrations.
 
 ---
 
@@ -35,19 +63,18 @@ Clone repo & install dependencies:
 git clone <your-repo-url>
 cd your-repo
 pnpm install
-# or npm install / yarn install / bun install
-````
+# or npm / yarn / bun
+```
 
-Run the dev server:
+Run locally:
 
 ```bash
 pnpm dev
-# or npm run dev / yarn dev / bun dev
 ```
 
 Visit 👉 [http://localhost:3000](http://localhost:3000)
 
-Edit `app/page.tsx` or any route in `app/` → browser hot-reloads instantly.
+Edit `app/page.tsx` (or any route in `app/`) → browser auto-reloads.
 
 ---
 
@@ -56,17 +83,17 @@ Edit `app/page.tsx` or any route in `app/` → browser hot-reloads instantly.
 ```
 src/
  ├─ app/               # Next.js routes
- │   ├─ services/      # Service pages (business, contracts, real estate, etc.)
+ │   ├─ services/      # Service pages
  │   ├─ results/       # Case wins & outcomes
  │   ├─ about/         # About & mission
- │   ├─ contact/       # Contact form + Calendly booking
- │   └─ layout.tsx     # Global layout (Navbar, TrustBar, Footer)
+ │   ├─ contact/       # Contact form + Calendly
+ │   └─ layout.tsx     # Navbar + TrustBar + Footer
  ├─ components/        # Shared UI
  │   ├─ Navbar.tsx
  │   ├─ Footer.tsx
- │   ├─ TrustBar.tsx   # scrolling assurance messages
+ │   ├─ TrustBar.tsx   # Rotating trust messages
  │   └─ CTASticky.tsx
- └─ styles/            # Global styles
+ └─ styles/            # Global Tailwind overrides
 ```
 
 ---
@@ -75,44 +102,37 @@ src/
 
 Deploy on [Vercel](https://vercel.com) in seconds:
 
-1. Push repo → GitHub
-2. Import repo into Vercel
-3. Add env variables (e.g., Google Maps API key)
-4. Click **Deploy** 🚀
+1. Push repo → GitHub  
+2. Import into Vercel  
+3. Add env vars (e.g. Google Maps API key)  
+4. Click **Deploy** 🚀  
 
 📖 Docs: [Next.js Deployment Guide](https://nextjs.org/docs/app/building-your-application/deploying)
 
 ---
 
-## 📚 Learn More
+## 📚 Resources
 
-* [Next.js Docs](https://nextjs.org/docs) – API & features
-* [Learn Next.js](https://nextjs.org/learn) – hands-on tutorial
-* [shadcn/ui](https://ui.shadcn.com) – headless UI components
+- [Next.js Docs](https://nextjs.org/docs)  
+- [Learn Next.js](https://nextjs.org/learn)  
+- [shadcn/ui](https://ui.shadcn.com)  
 
 ---
 
 ## 👥 Contributors
 
-* **Narasimha Reddy Putta** (Lead Developer)
-* Contributions welcome → PRs & Issues 💡
+- **Narasimha Reddy Putta** (Lead Developer)  
+- Open to PRs & Issues 💡
 
 ---
 
 ## 🏛️ About Cumberland Brooks, LLC
 
-We help clients **cut medical bills, reduce property taxes, and resolve collections**.
-Our fee model is simple: **you only pay when we save you money**.
+We help clients **cut medical bills, reduce property taxes, and resolve collections**.  
+Our model: **you only pay when we save you money**.  
 
 👉 [📅 Book a Free Consultation](https://calendly.com/narasimhareddyputta999/15min)
 
 ---
 
-✨ Built with precision, clarity, and relentless advocacy.
-
-```
-
----
-
-do you also want me to **add screenshots (About, Contact, Services pages)** into this README so it looks like a product showcase?
-```
+✨ Built with precision, clarity, and relentless advocacy.  
