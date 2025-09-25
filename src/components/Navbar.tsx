@@ -88,7 +88,6 @@ const services = [
     icon: ShieldCheck,
     bullets: ["HIPAA/PCI aware", "Policy drafting", "Staff training"],
   },
-  // Bonus: utilities/telecom if you add later
   {
     title: "Utilities & Telecom Disputes",
     href: "/services/utilities",
@@ -98,7 +97,7 @@ const services = [
   },
 ];
 
-/** Brand with safe fallback (no DOM mutation) */
+/** Brand with safe fallback */
 function BrandMark() {
   const [broken, setBroken] = useState(false);
   return (
@@ -136,7 +135,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // hover intent (prevents flicker)
+  // hover intent
   const scheduleOpen = () => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
     if (openTimer.current) window.clearTimeout(openTimer.current);
@@ -171,16 +170,12 @@ export default function Navbar() {
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
     if (!t) return services;
-    return services.filter(
-      (s) =>
-        s.title.toLowerCase().includes(t) ||
-        s.desc.toLowerCase().includes(t)
-    );
+    return services.filter((s) => s.title.toLowerCase().includes(t) || s.desc.toLowerCase().includes(t));
   }, [q]);
 
   return (
-    <header className={cn("sticky top-0 z-50 transition-all", scrolled ? "backdrop-blur bg-white/80 border-b" : "bg-white/95 border-b")}>
-      {/* Trust mini-bar (subtle, boosts credibility) */}
+    <header className={cn("sticky top-0 z-50 transition-all border-b", scrolled ? "backdrop-blur bg-white/80" : "bg-white/95")}>
+      {/* Trust mini-bar */}
       <div className="hidden border-b bg-white/60 md:block">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-xs text-slate-600 md:px-6">
           <div className="flex items-center gap-4">
@@ -205,18 +200,11 @@ export default function Navbar() {
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 md:flex">
           {/* Services mega-menu */}
-          <div
-            className="relative"
-            onMouseEnter={scheduleOpen}
-            onMouseLeave={scheduleClose}
-          >
+          <div className="relative" onMouseEnter={scheduleOpen} onMouseLeave={scheduleClose}>
             <button
               ref={triggerRef}
               type="button"
-              className={cn(
-                "inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm",
-                mega ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
-              )}
+              className={cn("inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm", mega ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50")}
               aria-haspopup="menu"
               aria-expanded={mega}
               aria-controls="mega-services"
@@ -239,9 +227,9 @@ export default function Navbar() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 6, scale: 0.98 }}
                   transition={{ duration: 0.16, ease: "easeOut" }}
-                  className="absolute left-0 top-full z-50 mt-2 w-[820px] rounded-2xl border bg-white p-5 shadow-xl"
+                  className="absolute left-1/2 top-full z-50 mt-3 -translate-x-1/2 w-[min(94vw,980px)] md:w-[min(90vw,1040px)] rounded-2xl border bg-white/95 p-4 md:p-5 shadow-2xl ring-1 ring-black/5 backdrop-blur"
                 >
-                  {/* Search + quick CTA */}
+                  {/* HEADER (search only — removed extra Book button) */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex w-full items-center gap-2 rounded-full border bg-white px-3 py-2">
                       <Search className="h-4 w-4 text-slate-400" />
@@ -253,15 +241,13 @@ export default function Navbar() {
                         aria-label="Search services"
                       />
                     </div>
-                    <Button size="sm" className="hidden rounded-full sm:inline-flex" onClick={openBook}>
-                      Book consult
-                    </Button>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-12 gap-4">
+                  {/* BODY */}
+                  <div className="mt-4 grid grid-cols-12 gap-4 max-h-[58vh] overflow-y-auto pr-1">
                     {/* Services grid */}
                     <div className="col-span-12 lg:col-span-8">
-                      <div className="grid grid-cols-2 gap-3 lg:grid-cols-2">
+                      <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
                         {filtered.map((s) => {
                           const Icon = s.icon;
                           return (
@@ -293,8 +279,11 @@ export default function Navbar() {
                           );
                         })}
                         {filtered.length === 0 && (
-                          <div className="col-span-2 rounded-xl border p-6 text-center text-sm text-slate-600">
-                            No matches. <Link href="/services" className="text-indigo-600 underline" onClick={() => setMega(false)}>See all services</Link>
+                          <div className="col-span-2 rounded-xl border p-6 text-center text-sm text-slate-600 xl:col-span-3">
+                            No matches.{" "}
+                            <Link href="/services" className="text-indigo-600 underline" onClick={() => setMega(false)}>
+                              See all services
+                            </Link>
                           </div>
                         )}
                       </div>
@@ -322,7 +311,9 @@ export default function Navbar() {
                           <div className="inline-flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-emerald-600" /> No upfront fees</div>
                           <div className="inline-flex items-center gap-1"><Clock4 className="h-4 w-4 text-indigo-600" /> Avg. weeks to resolve</div>
                         </div>
-                        <Button className="mt-4 w-full rounded-full" onClick={openBook}>Book Free Consultation</Button>
+                        <Button className="mt-4 w-full rounded-full" onClick={openBook}>
+                          Book Free Consultation
+                        </Button>
                       </div>
 
                       <div className="mt-3 rounded-2xl border p-4">
@@ -335,6 +326,7 @@ export default function Navbar() {
                     </div>
                   </div>
 
+                  {/* FOOTER */}
                   <div className="mt-4 flex items-center justify-between">
                     <Link
                       href="/services"
@@ -363,12 +355,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile toggle */}
-        <button
-          className="md:hidden"
-          aria-label="Toggle menu"
-          aria-expanded={open}
-          onClick={() => setOpen((s) => !s)}
-        >
+        <button className="md:hidden" aria-label="Toggle menu" aria-expanded={open} onClick={() => setOpen((s) => !s)}>
           {open ? <X /> : <Menu />}
         </button>
       </div>
@@ -391,20 +378,11 @@ export default function Navbar() {
               </summary>
               <div className="mt-2 grid gap-2">
                 {services.slice(0, 7).map((s) => (
-                  <Link
-                    key={s.href}
-                    href={s.href}
-                    onClick={() => setOpen(false)}
-                    className="rounded-lg p-2 text-sm text-slate-700 hover:bg-slate-50"
-                  >
+                  <Link key={s.href} href={s.href} onClick={() => setOpen(false)} className="rounded-lg p-2 text-sm text-slate-700 hover:bg-slate-50">
                     {s.title}
                   </Link>
                 ))}
-                <Link
-                  href="/services"
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg p-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
-                >
+                <Link href="/services" onClick={() => setOpen(false)} className="rounded-lg p-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50">
                   View all →
                 </Link>
               </div>

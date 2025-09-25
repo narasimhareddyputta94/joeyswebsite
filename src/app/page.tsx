@@ -175,105 +175,143 @@ function AddressEstimator({
   );
 }
 
-/* ================================== HERO ================================== */
+/* ================================== HERO (law-themed, no white trust block) ================================== */
 function Hero({ onOpenBook }: { onOpenBook: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, 50]);
 
   return (
-    <section ref={ref} className="relative isolate overflow-hidden pt-24">
-      {/* BG */}
+    <section ref={ref} className="relative isolate overflow-hidden pt-6 md:pt-8">
+      {/* Background: law-focused image + soft gradients */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_70%_-10%,rgba(59,130,246,0.35),transparent),radial-gradient(50%_50%_at_20%_10%,rgba(99,102,241,0.35),transparent)]" />
         <Image
-          src="https://images.unsplash.com/photo-1549921296-3a6b05c8c147?q=80&w=1600&auto=format&fit=crop"
-          alt="Conference room"
+          // Law/meeting background
+          src="https://images.unsplash.com/photo-1521791055366-0d553872125f?q=80&w=2000&auto=format&fit=crop"
+          alt="Attorney meeting reviewing documents"
           fill
           priority
-          className="object-cover opacity-40"
+          className="object-cover"
         />
-        <div className="absolute inset-0 bg-white/60" />
+        {/* keep content legible over image */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/55 to-white/30" />
+        <div className="pointer-events-none absolute inset-0 [background:radial-gradient(1200px_600px_at_10%_0%,rgba(79,70,229,.18),transparent),radial-gradient(800px_400px_at_90%_10%,rgba(99,102,241,.16),transparent)]" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/85 to-transparent" />
       </div>
 
-      <motion.div style={{ y }} className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-28 md:grid-cols-2 md:px-6">
+      {/* MAIN */}
+      <motion.div
+        style={{ y }}
+        className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 px-3 pb-8 md:grid-cols-2 md:gap-8 md:px-6 md:pb-10"
+      >
+        {/* LEFT */}
         <motion.div variants={container} initial="hidden" animate="show">
-          <motion.p variants={item} className="mb-3 font-medium text-indigo-600">
+          <motion.p variants={item} className="mb-2 text-sm font-medium text-indigo-600 md:text-[15px]">
             You only pay when we save you money
           </motion.p>
-          <motion.h1 variants={item} className="font-serif text-4xl leading-tight text-slate-900 md:text-5xl">
+
+          <motion.h1
+            variants={item}
+            className="font-serif text-[34px] leading-tight text-slate-900 md:text-5xl"
+          >
             Expert Negotiators. Real Savings.
           </motion.h1>
-          <motion.p variants={item} className="mt-4 max-w-xl text-lg text-slate-700">
-            We cut medical bills, reduce property taxes, and resolve collections—backed by transparent fees and a results-first mindset.
+
+          <motion.p variants={item} className="mt-2 max-w-lg text-[15px] text-slate-700 md:mt-3 md:text-lg">
+            We cut medical bills, reduce property taxes, and resolve collections—backed by transparent
+            fees and a results-first mindset.
           </motion.p>
-          <motion.div variants={item} className="mt-6 flex flex-wrap gap-3">
+
+          <motion.div variants={item} className="mt-4 flex flex-wrap gap-3">
             <Button className="rounded-full px-6" onClick={onOpenBook}>
-              Book Free Consult <ChevronRight className="ml-1" />
+              Book Free Consult <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
             <Button variant="outline" asChild className="rounded-full">
               <Link href="/services">Explore Services</Link>
             </Button>
           </motion.div>
 
-          <motion.div variants={item} className="mt-6 max-w-xl">
+          <motion.div variants={item} className="mt-4 max-w-lg">
             <AddressEstimator onBook={onOpenBook as any} />
           </motion.div>
 
-          <motion.div variants={item} className="mt-8 grid w-full max-w-xl grid-cols-2 gap-4 text-sm text-slate-600">
+          <motion.div
+            variants={item}
+            className="mt-5 grid w-full max-w-lg grid-cols-2 gap-3 text-sm text-slate-700"
+          >
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5" /> No upfront fees
+              <ShieldCheck className="h-5 w-5 text-indigo-600" /> No upfront fees
             </div>
             <div className="flex items-center gap-2">
-              <FileCheck2 className="h-5 w-5" /> HIPAA / PCI aware
+              <FileCheck2 className="h-5 w-5 text-indigo-600" /> HIPAA / PCI aware
             </div>
             <div className="flex items-center gap-2">
-              <Clock4 className="h-5 w-5" /> Avg. resolution in weeks
+              <Clock4 className="h-5 w-5 text-indigo-600" /> Avg. resolution in weeks
             </div>
             <div className="flex items-center gap-2">
-              <Handshake className="h-5 w-5" /> You only pay from savings
+              <Handshake className="h-5 w-5 text-indigo-600" /> You only pay from savings
             </div>
           </motion.div>
         </motion.div>
 
+        {/* RIGHT: law-appropriate photo card */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="relative h-[480px] w-full overflow-hidden rounded-2xl shadow-xl"
+          transition={{ duration: 0.5 }}
+          className="relative h-[340px] w-full overflow-hidden rounded-2xl shadow-lg md:h-[420px]"
         >
           <Image
-            src="https://images.unsplash.com/photo-1521791055366-0d553872125f?q=80&w=1500&auto=format&fit=crop"
-            alt="Attorney at work"
+            // Contract signing close-up (legal vibe)
+            src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1500&auto=format&fit=crop"
+            alt="Signing a contract during consultation"
             fill
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-slate-900/70 via-slate-900/20 to-transparent" />
-          <div className="absolute bottom-4 left-4 rounded-xl bg-white/80 p-4 backdrop-blur">
-            <p className="text-sm text-slate-600">Our brand vision</p>
-            <p className="font-serif text-xl text-slate-900">Relentless advocacy. Transparent results.</p>
+          <div className="absolute inset-0 bg-gradient-to-tr from-slate-900/65 via-slate-900/20 to-transparent" />
+          <div className="absolute bottom-4 left-4 rounded-lg bg-white/90 px-4 py-2 shadow-sm backdrop-blur">
+            <p className="text-xs text-slate-600">Our brand vision</p>
+            <p className="font-serif text-lg text-slate-900">Relentless advocacy. Transparent results.</p>
           </div>
         </motion.div>
       </motion.div>
 
-      {/* trust strip */}
-      <div className="border-t bg-white/70">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 px-4 py-4 sm:grid-cols-3 md:px-6">
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <Award className="h-4 w-4" /> Top-rated client satisfaction
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <Briefcase className="h-4 w-4" /> Corporate & individual matters
-          </div>
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <Users2 className="h-4 w-4" /> 10k+ billed cases reviewed
+      {/* TRUST STRIP — transparent (no white block) */}
+      <div className="border-t">
+        <div className="mx-auto max-w-6xl px-3 md:px-6">
+          <div className="my-3 flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2 text-sm text-slate-700">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50">
+                <Award className="h-4 w-4 text-indigo-600" />
+              </span>
+              Top-rated client satisfaction
+            </div>
+
+            <div className="hidden h-6 w-px shrink-0 bg-slate-200 sm:block" />
+
+            <div className="flex items-center gap-2 text-sm text-slate-700">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50">
+                <Briefcase className="h-4 w-4 text-indigo-600" />
+              </span>
+              Corporate &amp; individual matters
+            </div>
+
+            <div className="hidden h-6 w-px shrink-0 bg-slate-200 sm:block" />
+
+            <div className="flex items-center gap-2 text-sm text-slate-700">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50">
+                <Users2 className="h-4 w-4 text-indigo-600" />
+              </span>
+              10k+ billed cases reviewed
+            </div>
           </div>
         </div>
       </div>
     </section>
   );
 }
+
 
 /* =================== SERVICES: 3/2/4-at-a-time LOOPING CAROUSEL =================== */
 const SERVICES = [
