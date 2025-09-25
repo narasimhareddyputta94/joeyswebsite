@@ -3,22 +3,44 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
-  ChevronRight, ChevronLeft, ShieldCheck, FileCheck2, Clock4, Handshake, DollarSign,
-  MapPin, Phone, Mail, Users2, Award, Briefcase, ClipboardCheck, Quote, Star,
-  Scale, Gavel, Stethoscope, Building2, Landmark, LandPlot, FileCheck2 as FileCheck
+  ChevronRight,
+  ChevronLeft,
+  ShieldCheck,
+  FileCheck2,
+  Clock4,
+  Handshake,
+  DollarSign,
+  MapPin,
+  Phone,
+  Mail,
+  Users2,
+  Award,
+  Briefcase,
+  ClipboardCheck,
+  Quote,
+  Star,
+  Scale,
+  Gavel,
+  Stethoscope,
+  Building2,
+  Landmark,
+  LandPlot,
+  FileCheck2 as FileCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 /* ----------------------------- Anim helpers ----------------------------- */
-const container = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { staggerChildren: 0.06, duration: .5 } } };
+const container = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { staggerChildren: 0.06, duration: 0.5 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 
 /* ========================== BOOK DRAWER (Calendly) ========================== */
 function BookDrawer({
-  open, onOpenChange, prefill,
+  open,
+  onOpenChange,
+  prefill,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -82,7 +104,11 @@ function AddressEstimator({
     if (!address) return;
     setLoading(true);
     try {
-      const r = await fetch("/api/estimate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ address, propertyType: ptype }) });
+      const r = await fetch("/api/estimate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address, propertyType: ptype }),
+      });
       const data = await r.json();
       setEstimate(data?.estimatedSavings ?? null);
     } finally {
@@ -92,7 +118,11 @@ function AddressEstimator({
 
   async function submitLead() {
     if (!email || !address) return;
-    await fetch("/api/lead", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, address, ptype, source: "home-hero" }) });
+    await fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, address, ptype, source: "home-hero" }),
+    });
     onBook({ email, address, ptype });
   }
 
@@ -103,7 +133,9 @@ function AddressEstimator({
           <button
             key={t}
             onClick={() => setPtype(t)}
-            className={`rounded-full border px-3 py-1 text-sm ${ptype === t ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-700 hover:bg-slate-50"}`}
+            className={`rounded-full border px-3 py-1 text-sm ${
+              ptype === t ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-700 hover:bg-slate-50"
+            }`}
           >
             {t[0].toUpperCase() + t.slice(1)}
           </button>
@@ -116,7 +148,9 @@ function AddressEstimator({
           onChange={(e) => setAddress(e.target.value)}
           className="rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 sm:col-span-2"
         />
-        <Button onClick={runEstimate} className="rounded-lg">{loading ? "Estimating..." : "Get estimate"}</Button>
+        <Button onClick={runEstimate} className="rounded-lg">
+          {loading ? "Estimating..." : "Get estimate"}
+        </Button>
       </div>
       {estimate !== null && (
         <div className="mt-3 grid items-center gap-2 sm:grid-cols-3">
@@ -131,7 +165,9 @@ function AddressEstimator({
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            <Button className="rounded-lg" disabled={!email} onClick={submitLead}>Send</Button>
+            <Button className="rounded-lg" disabled={!email} onClick={submitLead}>
+              Send
+            </Button>
           </div>
         </div>
       )}
@@ -162,7 +198,9 @@ function Hero({ onOpenBook }: { onOpenBook: () => void }) {
 
       <motion.div style={{ y }} className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-28 md:grid-cols-2 md:px-6">
         <motion.div variants={container} initial="hidden" animate="show">
-          <motion.p variants={item} className="mb-3 font-medium text-indigo-600">You only pay when we save you money</motion.p>
+          <motion.p variants={item} className="mb-3 font-medium text-indigo-600">
+            You only pay when we save you money
+          </motion.p>
           <motion.h1 variants={item} className="font-serif text-4xl leading-tight text-slate-900 md:text-5xl">
             Expert Negotiators. Real Savings.
           </motion.h1>
@@ -179,18 +217,32 @@ function Hero({ onOpenBook }: { onOpenBook: () => void }) {
           </motion.div>
 
           <motion.div variants={item} className="mt-6 max-w-xl">
-            <AddressEstimator onBook={onOpenBook} />
+            <AddressEstimator onBook={onOpenBook as any} />
           </motion.div>
 
           <motion.div variants={item} className="mt-8 grid w-full max-w-xl grid-cols-2 gap-4 text-sm text-slate-600">
-            <div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" /> No upfront fees</div>
-            <div className="flex items-center gap-2"><FileCheck2 className="h-5 w-5" /> HIPAA / PCI aware</div>
-            <div className="flex items-center gap-2"><Clock4 className="h-5 w-5" /> Avg. resolution in weeks</div>
-            <div className="flex items-center gap-2"><Handshake className="h-5 w-5" /> You only pay from savings</div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5" /> No upfront fees
+            </div>
+            <div className="flex items-center gap-2">
+              <FileCheck2 className="h-5 w-5" /> HIPAA / PCI aware
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock4 className="h-5 w-5" /> Avg. resolution in weeks
+            </div>
+            <div className="flex items-center gap-2">
+              <Handshake className="h-5 w-5" /> You only pay from savings
+            </div>
           </motion.div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="relative h-[480px] w-full overflow-hidden rounded-2xl shadow-xl">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative h-[480px] w-full overflow-hidden rounded-2xl shadow-xl"
+        >
           <Image
             src="https://images.unsplash.com/photo-1521791055366-0d553872125f?q=80&w=1500&auto=format&fit=crop"
             alt="Attorney at work"
@@ -208,16 +260,22 @@ function Hero({ onOpenBook }: { onOpenBook: () => void }) {
       {/* trust strip */}
       <div className="border-t bg-white/70">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 px-4 py-4 sm:grid-cols-3 md:px-6">
-          <div className="flex items-center gap-2 text-sm text-slate-600"><Award className="h-4 w-4" /> Top-rated client satisfaction</div>
-          <div className="flex items-center gap-2 text-sm text-slate-600"><Briefcase className="h-4 w-4" /> Corporate & individual matters</div>
-          <div className="flex items-center gap-2 text-sm text-slate-600"><Users2 className="h-4 w-4" /> 10k+ billed cases reviewed</div>
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <Award className="h-4 w-4" /> Top-rated client satisfaction
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <Briefcase className="h-4 w-4" /> Corporate & individual matters
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <Users2 className="h-4 w-4" /> 10k+ billed cases reviewed
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-/* =================== SERVICES: ONE-BY-ONE LOOPING SLIDER =================== */
+/* =================== SERVICES: 3/2/4-at-a-time LOOPING CAROUSEL =================== */
 const SERVICES = [
   {
     icon: <Gavel className="h-6 w-6" />,
@@ -270,90 +328,230 @@ const SERVICES = [
   },
 ];
 
-function ServicesSlider() {
-  const items = useMemo(() => SERVICES, []);
-  const [idx, setIdx] = useState(0);
-
-  // autoplay one-by-one loop
+/* -------- responsive slides-per-view (1 / 2 / 4) -------- */
+function useSlidesPerView() {
+  const [spv, setSpv] = useState(4); // desktop default
   useEffect(() => {
-    const id = setInterval(() => setIdx(i => (i + 1) % items.length), 4500);
-    return () => clearInterval(id);
-  }, [items.length]);
+    const calc = () => {
+      if (window.innerWidth < 640) setSpv(1);
+      else if (window.innerWidth < 1024) setSpv(2);
+      else setSpv(4);
+    };
+    calc();
+    window.addEventListener("resize", calc, { passive: true });
+    return () => window.removeEventListener("resize", calc);
+  }, []);
+  return spv;
+}
 
-  const prev = () => setIdx(i => (i - 1 + items.length) % items.length);
-  const next = () => setIdx(i => (i + 1) % items.length);
 
-  const active = items[idx];
+/* =================== SERVICES: continuous “train”, 4-up on desktop =================== */
+function ServicesSlider() {
+  const spv = useSlidesPerView();        // 1 / 2 / 4 (mobile / tablet / desktop)
+  const base = useMemo(() => SERVICES, []);
+  const baseLen = base.length;
+
+  /* --- layout math (pixel-perfect widths) --- */
+  const frameRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  // tighter visual gaps, wider cards
+  const GAP = 16; // px between cards
+  const [slideW, setSlideW] = useState(0);
+
+  useEffect(() => {
+    const compute = () => {
+      const frame = frameRef.current;
+      if (!frame) return;
+      const fw = frame.clientWidth;
+      const w = (fw - GAP * (spv - 1)) / spv;
+      setSlideW(w);
+    };
+    compute();
+    const ro = new ResizeObserver(compute);
+    if (frameRef.current) ro.observe(frameRef.current);
+    window.addEventListener("resize", compute, { passive: true });
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", compute);
+    };
+  }, [spv]);
+
+  /* --- build a long track for seamless wrap --- */
+  // twice the list so we can wrap mid-scroll without snapping
+  const extended = useMemo(() => [...base, ...base], [base]);
+
+  /* --- continuous motion (requestAnimationFrame) --- */
+  // target speed: ~ one card every ~1.6s → px/s = (slideW+GAP)/1.6
+  const SPEED_SCALE = 0.3; // feel free to tweak 0.8–1.3
+  const speedRef = useRef(1);              // multiplier you can nudge with buttons
+  const offsetRef = useRef(0);             // current scroll offset in px
+  const rafRef = useRef<number | null>(null);
+  const pausedRef = useRef(false);
+
+  const totalRealWidth = (slideW + GAP) * baseLen;                 // width of a single full set
+  const totalExtendedWidth = (slideW + GAP) * extended.length - GAP;
+
+  const tick = (tNow: number) => {
+    const track = trackRef.current;
+    if (!track || pausedRef.current || !slideW) {
+      rafRef.current = requestAnimationFrame(tick);
+      return;
+    }
+    // compute velocity
+    const now = performance.now();
+    // remember last time on the track element (avoid extra ref)
+    const last = (track as any)._lastTime ?? now;
+    (track as any)._lastTime = now;
+    const dt = Math.max(0, now - last) / 1000; // seconds
+
+    const pxPerSec = ((slideW + GAP) / 1.6) * SPEED_SCALE * speedRef.current;
+    offsetRef.current += pxPerSec * dt;
+
+    // wrap around seamlessly
+    if (offsetRef.current >= totalRealWidth) {
+      offsetRef.current -= totalRealWidth;
+    }
+
+    // apply transform
+    track.style.transform = `translate3d(${-offsetRef.current}px,0,0)`;
+    rafRef.current = requestAnimationFrame(tick);
+  };
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    // hover pause/resume
+    const pause = () => { pausedRef.current = true; };
+    const resume = () => { (trackRef.current as any)._lastTime = performance.now(); pausedRef.current = false; };
+    frame.addEventListener("mouseenter", pause);
+    frame.addEventListener("mouseleave", resume);
+    frame.addEventListener("focusin", pause);
+    frame.addEventListener("focusout", resume);
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      frame.removeEventListener("mouseenter", pause);
+      frame.removeEventListener("mouseleave", resume);
+      frame.removeEventListener("focusin", pause);
+      frame.removeEventListener("focusout", resume);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slideW, baseLen]);
+
+  /* --- controls --- */
+  const nudge = (dir: -1 | 1) => {
+    // gentle nudge: momentarily speed up / slow down
+    speedRef.current = dir === 1 ? 1.75 : 0.35;
+    window.setTimeout(() => (speedRef.current = 1), 450);
+  };
+
+  /* --- active dot (where the “window start” sits) --- */
+  const activeDot = slideW ? Math.floor((offsetRef.current / (slideW + GAP)) % baseLen) : 0;
 
   return (
     <section className="bg-gradient-to-b from-white to-slate-50 py-20">
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
+      <div className="mx-auto max-w-7xl px-3 md:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="kicker text-indigo-600">What we do</p>
           <h2 className="font-serif text-3xl text-slate-900 md:text-4xl">Discover our services</h2>
           <p className="mt-3 text-slate-600">Precise analysis. Aggressive negotiation. Ethical practice.</p>
+
+          {/* micro-trust bar for this section */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-600">
+            <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> No upfront fees
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1">
+              <FileCheck2 className="h-3.5 w-3.5 text-indigo-600" /> HIPAA / PCI aware
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1">
+              <Clock4 className="h-3.5 w-3.5 text-slate-700" /> Avg. resolution in weeks
+            </span>
+          </div>
         </div>
 
-        {/* slider */}
-        <div className="relative mx-auto mt-10 max-w-3xl">
-          <div className="absolute -left-3 top-1/2 -translate-y-1/2">
-            <button onClick={prev} className="rounded-full border bg-white p-2 shadow-sm hover:bg-slate-50" aria-label="Previous service">
+        <div className="relative mx-auto mt-8"> {/* full width of container for bigger cards */}
+          {/* controls (top-right) */}
+          <div className="pointer-events-none absolute -top-12 right-0 hidden gap-2 sm:flex">
+            <button
+              onClick={() => nudge(-1)}
+              className="pointer-events-auto rounded-full border bg-white p-2 shadow-sm transition hover:bg-slate-50"
+              aria-label="Previous"
+            >
               <ChevronLeft className="h-5 w-5" />
             </button>
-          </div>
-          <div className="absolute -right-3 top-1/2 -translate-y-1/2">
-            <button onClick={next} className="rounded-full border bg-white p-2 shadow-sm hover:bg-slate-50" aria-label="Next service">
+            <button
+              onClick={() => nudge(1)}
+              className="pointer-events-auto rounded-full border bg-white p-2 shadow-sm transition hover:bg-slate-50"
+              aria-label="Next"
+            >
               <ChevronRight className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="relative h-[320px]">
-            <AnimatePresence mode="wait">
-              <motion.article
-                key={active.href}
-                initial={{ opacity: 0, x: 60 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -60 }}
-                transition={{ type: "spring", stiffness: 220, damping: 26 }}
-                className="absolute inset-0 overflow-hidden rounded-2xl border bg-white p-6 shadow-sm"
-              >
-                <div className="absolute inset-0 -z-10 bg-[radial-gradient(40%_40%_at_20%_-10%,rgba(99,102,241,.12),transparent)]" />
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                  {active.icon}
-                </div>
-                <h3 className="mt-4 font-serif text-xl text-slate-900">{active.title}</h3>
-                <p className="mt-2 text-sm text-slate-600">{active.desc}</p>
-                <ul className="mt-3 space-y-1 text-sm text-slate-600">
-                  {active.bullets?.map((b, j) => (
-                    <li key={j} className="flex items-start gap-2">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                      <span>{b}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-5">
-                  <Link href={active.href} className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700">
-                    Learn more <ChevronRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </div>
-              </motion.article>
-            </AnimatePresence>
+          {/* frame (no hard max width so cards can breathe) */}
+          <div ref={frameRef} className="overflow-hidden rounded-2xl">
+            <div
+              ref={trackRef}
+              className="flex"
+              style={{
+                gap: `${GAP}px`,
+                width: slideW ? `${(slideW + GAP) * extended.length - GAP}px` : "auto",
+                transform: "translate3d(0,0,0)",
+                willChange: "transform",
+              }}
+            >
+              {extended.map((a, idx) => (
+                <article key={`${a.title}-${idx}`} className="shrink-0" style={{ width: slideW ? `${slideW}px` : undefined }}>
+                  <div className="relative h-full rounded-2xl border bg-white p-7 shadow-sm transition-shadow hover:shadow-lg">
+                    <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_45%_at_20%_-10%,rgba(99,102,241,.12),transparent)] opacity-0 transition-opacity hover:opacity-100" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                      {a.icon}
+                    </div>
+                    <h3 className="mt-4 font-serif text-xl text-slate-900">{a.title}</h3>
+                    <p className="mt-2 text-sm text-slate-600">{a.desc}</p>
+                    {a.bullets && (
+                      <ul className="mt-3 space-y-1 text-sm text-slate-600">
+                        {a.bullets.map((b, j) => (
+                          <li key={j} className="flex items-start gap-2">
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="mt-5">
+                      <Link href={a.href} className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                        Learn more <ChevronRight className="ml-1 h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
 
-          {/* dots */}
-          <div className="mt-6 flex items-center justify-center gap-2">
-            {items.map((_, i) => (
+          {/* dots (map to the real list, not the clones) */}
+          <div className="mt-5 flex items-center justify-center gap-2">
+            {Array.from({ length: baseLen }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => setIdx(i)}
-                aria-label={`Go to ${i + 1}`}
-                className={`h-2.5 w-2.5 rounded-full transition ${i === idx ? "bg-indigo-600" : "bg-slate-300 hover:bg-slate-400"}`}
+                onClick={() => {
+                  // jump the offset near that dot’s start without snapping
+                  offsetRef.current = i * (slideW + GAP);
+                  // reset last time to avoid velocity spike
+                  if (trackRef.current) (trackRef.current as any)._lastTime = performance.now();
+                }}
+                aria-label={`Go to slide ${i + 1}`}
+                className={`h-2.5 w-2.5 rounded-full transition ${i === activeDot ? "bg-indigo-600" : "bg-slate-300 hover:bg-slate-400"}`}
               />
             ))}
           </div>
 
-          {/* section CTAs */}
-          <div className="mt-8 flex items-center justify-center gap-3">
+          {/* CTA row */}
+          <div className="mt-6 flex items-center justify-center gap-3">
             <Button asChild className="rounded-full px-6">
               <Link href="/services">See all services</Link>
             </Button>
@@ -366,6 +564,7 @@ function ServicesSlider() {
     </section>
   );
 }
+
 
 /* ============================ RESULTS STRIP ============================ */
 const RESULTS = [
@@ -408,7 +607,9 @@ function ResultsStrip() {
             <Link href="/results">View detailed results</Link>
           </Button>
         </div>
-        <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-2"><Marquee /></div>
+        <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-2">
+          <Marquee />
+        </div>
       </div>
     </section>
   );
@@ -435,7 +636,9 @@ function Testimonials() {
               <CardContent className="p-6">
                 <Quote className="absolute -left-2 -top-2 h-10 w-10 rotate-12 text-indigo-200" />
                 <div className="mb-2 flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, j) => <Star key={j} className="h-4 w-4 fill-yellow-400 text-yellow-400" />)}
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <Star key={j} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  ))}
                 </div>
                 <p className="text-slate-700">{q.text}</p>
                 <p className="mt-4 text-sm font-medium text-slate-900">{q.name}</p>
@@ -478,42 +681,60 @@ function CaseTeam() {
   );
 }
 
-/* =================================== FAQ =================================== */
+/* =================================== FAQ (denser, 6 Qs) =================================== */
 function FAQSection() {
   const faqs = [
-    { q: "Do I pay anything upfront?", a: "For savings matters (property tax, medical bill reductions, many collections) there are no upfront fees—our compensation comes from the savings we secure. For other engagements we use transparent flat or clearly-scoped fees." },
-    { q: "How long does a typical case take?", a: "Many matters resolve within weeks. Appeals tied to government calendars can take longer; we set expectations on day one and provide weekly updates." },
-    { q: "Will this hurt my credit?", a: "Our approach is credit-aware. When supported by law and evidence we pursue deletions or corrected reporting. We never advise steps that jeopardize critical credit goals." },
-    { q: "Is my information secure?", a: "Yes. We use encrypted document intake, least-privilege access, and HIPAA/PCI-aware workflows." },
-    { q: "Can you work outside my state?", a: "We cover many U.S. markets directly and collaborate with local counsel when required by practice rules—seamlessly for you." },
-    { q: "What happens in the free case review?", a: "You share documents securely. We map savings/risk, timelines, and pricing options. You decide if/when to proceed—no pressure." },
-    { q: "How do you measure success?", a: "Documented savings, corrected reporting, and friction removed. Every engagement ends with a summary of outcomes in writing." },
-    { q: "What if you don’t save me money?", a: "Then you don’t owe us a success-based fee. Simple as that." },
+    {
+      q: "Do I pay anything upfront?",
+      a: "For savings matters (property tax, medical bill reductions, many collections) there are no upfront fees—our compensation comes from the savings we secure. Other engagements use transparent flat or clearly-scoped fees.",
+    },
+    {
+      q: "How long does a typical case take?",
+      a: "Many matters resolve within weeks. Appeals tied to government calendars can take longer; we set expectations on day one and provide weekly updates.",
+    },
+    {
+      q: "Will this hurt my credit?",
+      a: "Our approach is credit-aware. When supported by law and evidence we pursue deletions or corrected reporting. We never advise steps that jeopardize critical credit goals.",
+    },
+    {
+      q: "Is my information secure?",
+      a: "Yes. We use encrypted document intake, least-privilege access, and HIPAA/PCI-aware workflows.",
+    },
+    {
+      q: "Can you work outside my state?",
+      a: "We cover many U.S. markets directly and collaborate with local counsel when required by practice rules—seamlessly for you.",
+    },
+    {
+      q: "What happens in the free case review?",
+      a: "You share documents securely. We map savings/risk, timelines, and pricing options. You decide if/when to proceed—no pressure.",
+    },
   ];
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <section className="bg-white py-16">
+    <section className="bg-white py-14">
       <div className="mx-auto max-w-4xl px-4 md:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="kicker text-indigo-600">Questions</p>
           <h2 className="font-serif text-3xl text-slate-900 md:text-4xl">FAQ</h2>
         </div>
-        <div className="mt-8 space-y-3">
+        <div className="mt-6 space-y-2">
           {faqs.map((f, i) => {
             const isOpen = open === i;
             return (
               <div key={i} className="overflow-hidden rounded-xl border bg-white">
-                <button className="flex w-full items-center justify-between px-4 py-4 text-left" onClick={() => setOpen(isOpen ? null : i)}>
+                <button className="flex w-full items-center justify-between px-4 py-3 text-left" onClick={() => setOpen(isOpen ? null : i)}>
                   <span className="font-medium text-slate-900">{f.q}</span>
                   {isOpen ? <ChevronLeft className="h-5 w-5 rotate-90 text-slate-500" /> : <ChevronRight className="h-5 w-5 text-slate-500" />}
                 </button>
-                {isOpen && <div className="px-4 pb-4 text-slate-600">{f.a}</div>}
+                {isOpen && <div className="px-4 pb-3 text-slate-600">{f.a}</div>}
               </div>
             );
           })}
         </div>
-        <div className="mt-8 text-center">
-          <Button asChild className="rounded-full"><Link href="/contact">Still have questions? Talk to us</Link></Button>
+        <div className="mt-6 text-center">
+          <Button asChild className="rounded-full">
+            <Link href="/contact">Still have questions? Talk to us</Link>
+          </Button>
         </div>
       </div>
     </section>
@@ -534,27 +755,39 @@ function ContactSection() {
             <div className="rounded-2xl border bg-slate-50 p-4">
               <p className="text-sm text-slate-600">Call</p>
               <a className="mt-1 block text-lg font-medium text-slate-900" href="tel:+13124889775">
-                <span className="inline-flex items-center gap-2"><Phone className="h-4 w-4 text-indigo-600" /> (312) 488-9775</span>
+                <span className="inline-flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-indigo-600" /> (312) 488-9775
+                </span>
               </a>
               <p className="text-xs text-slate-500">Weekdays 9–6 (CT)</p>
             </div>
             <div className="rounded-2xl border bg-slate-50 p-4">
               <p className="text-sm text-slate-600">Email</p>
               <a className="mt-1 block text-lg font-medium text-slate-900" href="mailto:info@cumberlandbrooks.com">
-                <span className="inline-flex items-center gap-2"><Mail className="h-4 w-4 text-indigo-600" /> info@cumberlandbrooks.com</span>
+                <span className="inline-flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-indigo-600" /> info@cumberlandbrooks.com
+                </span>
               </a>
               <p className="text-xs text-slate-500">Replies within 1 business day</p>
             </div>
             <div className="rounded-2xl border bg-slate-50 p-4 sm:col-span-2">
               <p className="text-sm text-slate-600">Office</p>
-              <p className="mt-1 text-slate-900"><span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-indigo-600" /> 752 S. 6th St., Ste. R, Las Vegas, NV 89101</span></p>
+              <p className="mt-1 text-slate-900">
+                <span className="inline-flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-indigo-600" /> 752 S. 6th St., Ste. R, Las Vegas, NV 89101
+                </span>
+              </p>
               <p className="text-xs text-slate-500">By appointment only</p>
             </div>
           </div>
 
           <div className="mt-6 flex gap-3">
-            <Button asChild className="rounded-full"><Link href="/contact">Open contact page</Link></Button>
-            <Button asChild variant="outline" className="rounded-full"><Link href="/results">See results</Link></Button>
+            <Button asChild className="rounded-full">
+              <Link href="/contact">Open contact page</Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link href="/results">See results</Link>
+            </Button>
           </div>
         </div>
 
@@ -589,10 +822,16 @@ function StickyCTA({ onOpenBook }: { onOpenBook: () => void }) {
       <div className="flex w-full max-w-3xl items-center justify-between gap-3 rounded-full border bg-white/90 p-2 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="px-3 text-sm text-slate-700">No upfront fees. Average resolution in weeks.</div>
         <div className="flex items-center gap-2">
-          <a href="tel:+13124889775" className="hidden rounded-full border px-4 py-2 text-sm text-slate-800 transition-colors hover:bg-slate-50 sm:block" aria-label="Call (312) 488-9775">
+          <a
+            href="tel:+13124889775"
+            className="hidden rounded-full border px-4 py-2 text-sm text-slate-800 transition-colors hover:bg-slate-50 sm:block"
+            aria-label="Call (312) 488-9775"
+          >
             (312) 488-9775
           </a>
-          <Button onClick={onOpenBook} className="rounded-full">Book Free Consultation</Button>
+          <Button onClick={onOpenBook} className="rounded-full">
+            Book Free Consultation
+          </Button>
         </div>
       </div>
     </div>
@@ -602,7 +841,7 @@ function StickyCTA({ onOpenBook }: { onOpenBook: () => void }) {
 /* ================================= PAGE ================================= */
 export default function Page() {
   const [drawer, setDrawer] = useState(false);
-  const [prefill, setPrefill] = useState<{ name?: string; email?: string; address?: string; ptype?: "residential" | "commercial"; }>();
+  const [prefill, setPrefill] = useState<{ name?: string; email?: string; address?: string; ptype?: "residential" | "commercial" }>();
 
   return (
     <main className="text-slate-800">
