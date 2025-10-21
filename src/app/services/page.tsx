@@ -1,23 +1,33 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { motion } from "framer-motion";
 import {
   ChevronRight, Scale, Gavel, ShieldCheck, Landmark, Building2, Briefcase, FileText,
-  Handshake, Building, Users, Stethoscope, GraduationCap, Key, ClipboardCheck,
+  Handshake, Building, Users, Stethoscope, GraduationCap, ClipboardCheck,
   Hammer, Banknote, BookOpen, UserRound, ShieldAlert, ScrollText, Clock4, Sparkles, CheckCircle2
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-const container = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { staggerChildren: 0.06, duration: 0.5 } },
-};
-const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
+import BookDrawer from "@/components/BookDrawer";
 
 export default function ServicesPage() {
+  // === Drawer (15-min Calendly) ===
+  const [drawer, setDrawer] = useState(false);
+  const [prefill, setPrefill] = useState<{ name?: string; email?: string; address?: string; ptype?: "residential" | "commercial" }>();
+
+  // Listen for global "open-book" (fired by Navbar/Sticky/etc.)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      if (typeof (e as any).preventDefault === "function") (e as any).preventDefault();
+      const detail = (e as CustomEvent).detail as typeof prefill | undefined;
+      if (detail) setPrefill(detail);
+      setDrawer(true);
+    };
+    window.addEventListener("open-book", handler as EventListener);
+    return () => window.removeEventListener("open-book", handler as EventListener);
+  }, []);
+
   // === Quick Links (all service pages) ===
   const quickLinks = [
     { href: "/services/property-tax", label: "Property Tax Appeals" },
@@ -122,13 +132,13 @@ export default function ServicesPage() {
       {/* HERO */}
       <section className="relative isolate overflow-hidden">
         <div className="absolute inset-0 -z-10">
+          {/* soft gradients */}
           <div className="absolute inset-0 bg-[radial-gradient(70%_70%_at_70%_-10%,rgba(59,130,246,0.25),transparent),radial-gradient(60%_60%_at_10%_10%,rgba(99,102,241,0.25),transparent)]" />
-          <Image
-            src="https://images.unsplash.com/photo-1528747045269-390fe33c19d8?q=80&w=1600&auto=format&fit=crop"
+          {/* REPLACED BROKEN IMAGE WITH A RELIABLE ONE */}
+          <img
+            src="https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1600&q=80"
             alt="Law library"
-            fill
-            className="object-cover opacity-30"
-            priority
+            className="h-full w-full object-cover opacity-30"
           />
           <div className="absolute inset-0 bg-white/60" />
         </div>
@@ -142,8 +152,8 @@ export default function ServicesPage() {
               protect your money and momentum. Start with a free case review—no pressure, no upfront fee.
             </p>
             <div className="mt-6 flex gap-3">
-              <Button asChild className="rounded-full px-6">
-                <Link href="/contact">Book a free consultation</Link>
+              <Button className="rounded-full px-6" onClick={() => setDrawer(true)}>
+                Book a free consultation
               </Button>
               <Button asChild variant="outline" className="rounded-full">
                 <Link href="/results">See recent results</Link>
@@ -167,12 +177,12 @@ export default function ServicesPage() {
             </div>
           </div>
 
+          {/* “Conference” image — kept as <img> to avoid next/image domain config */}
           <div className="relative h-64 w-full overflow-hidden rounded-2xl shadow-xl">
-            <Image
-              src="https://images.unsplash.com/photo-1528744598421-b7b93e12df0a?q=80&w=1600&auto=format&fit=crop"
+            <img
+              src="https://images.unsplash.com/photo-1528744598421-b7b93e12df0a?auto=format&fit=crop&w=1600&q=80"
               alt="Conference"
-              fill
-              className="object-cover"
+              className="h-full w-full object-cover"
             />
             <div className="absolute bottom-4 left-4 rounded-xl bg-white/85 p-4 backdrop-blur">
               <p className="text-sm text-slate-600">Why clients choose us</p>
@@ -226,16 +236,9 @@ export default function ServicesPage() {
             <p className="mt-2 text-slate-600">Quick wins that protect cash flow and remove friction.</p>
           </div>
 
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          >
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((s, i) => (
-              <motion.a
-                variants={item}
+              <a
                 key={i}
                 href={s.href}
                 className="group relative overflow-hidden rounded-2xl border bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
@@ -249,9 +252,9 @@ export default function ServicesPage() {
                 <span className="mt-4 inline-flex items-center text-sm font-medium text-indigo-600">
                   Learn more <ChevronRight className="ml-1 h-4 w-4" />
                 </span>
-              </motion.a>
+              </a>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -263,25 +266,25 @@ export default function ServicesPage() {
             <h2 className="font-serif text-3xl text-slate-900 md:text-4xl">Comprehensive practice coverage</h2>
           </div>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {fullCatalog.map((s, i) => (
-              <Card key={i} className="group transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <CardContent className="flex items-start gap-3 p-5">
-                  <div className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                    {s.icon}
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-900">{s.t}</p>
-                    <p className="mt-1 text-sm text-slate-600">{s.d}</p>
-                    <Link href={s.link} className="mt-2 inline-flex items-center text-sm font-medium text-indigo-600">
-                      {s.link.startsWith("/services") ? "View service" : "Start a review"}{" "}
-                      <ChevronRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {fullCatalog.map((s, i) => (
+            <Card key={i} className="group transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <CardContent className="flex items-start gap-3 p-5">
+                <div className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                  {s.icon}
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">{s.t}</p>
+                  <p className="mt-1 text-sm text-slate-600">{s.d}</p>
+                  <Link href={s.link} className="mt-2 inline-flex items-center text-sm font-medium text-indigo-600">
+                    {s.link.startsWith("/services") ? "View service" : "Start a review"}{" "}
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
           {/* Industries */}
           <div className="mt-14">
@@ -335,8 +338,8 @@ export default function ServicesPage() {
           </div>
 
           <div className="mt-8 text-center">
-            <Button asChild className="rounded-full px-6">
-              <Link href="/contact">Get my tailored quote</Link>
+            <Button className="rounded-full px-6" onClick={() => setDrawer(true)}>
+              Get my tailored quote
             </Button>
           </div>
         </div>
@@ -386,11 +389,11 @@ export default function ServicesPage() {
             </div>
             <div className="mt-6">
               <Button
-                asChild
                 variant="secondary"
                 className="w-full rounded-full bg-white text-slate-900 hover:bg-slate-100"
+                onClick={() => setDrawer(true)}
               >
-                <Link href="/contact">Book a free consultation</Link>
+                Book a free consultation
               </Button>
             </div>
           </div>
@@ -409,8 +412,8 @@ export default function ServicesPage() {
               </p>
             </div>
             <div className="flex gap-3 md:justify-end">
-              <Button asChild className="rounded-full">
-                <Link href="/contact">Start my review</Link>
+              <Button className="rounded-full" onClick={() => setDrawer(true)}>
+                Start my review
               </Button>
               <Button asChild variant="outline" className="rounded-full">
                 <Link href="/results">See results</Link>
@@ -419,6 +422,9 @@ export default function ServicesPage() {
           </div>
         </div>
       </section>
+
+      {/* Drawer (15-min Calendly) */}
+      <BookDrawer open={drawer} onOpenChange={setDrawer} prefill={prefill} />
     </main>
   );
 }

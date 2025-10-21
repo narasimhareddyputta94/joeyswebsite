@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Mail,
@@ -34,13 +35,25 @@ export default function Footer() {
           {/* Brand + Value */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2" aria-label="Cumberland Brooks, LLC — Home">
-              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-indigo-600 to-blue-500" aria-hidden />
+              {/* ✅ Replaced gradient with actual logo */}
+              <div className="relative h-9 w-9">
+                <Image
+                  src="/logo.png"
+                  alt="Cumberland Brooks Logo"
+                  fill
+                  sizes="36px"
+                  priority
+                  className="object-contain"
+                />
+              </div>
               <p className="font-serif text-xl text-slate-900">Cumberland Brooks, LLC</p>
             </Link>
 
             <p className="mt-3 text-sm leading-relaxed">
               Results-driven advocacy in medical bill reductions, property tax appeals, and collections.
-              <span className="ml-1 font-medium text-slate-900">You only pay when we save you money.</span>
+              <span className="ml-1 font-medium text-slate-900">
+                You only pay when we save you money.
+              </span>
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs">

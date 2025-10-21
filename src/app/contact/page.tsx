@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import BookDrawer from "@/components/BookDrawer";
 import {
   Phone,
   Mail,
@@ -22,6 +23,30 @@ import {
 export default function ContactPage() {
   const [copied, setCopied] = useState<"phone" | "email" | null>(null);
   const [sent, setSent] = useState(false);
+
+  // drawer state + optional prefill (kept for future compatibility)
+  const [drawer, setDrawer] = useState(false);
+  const [prefill, setPrefill] = useState<{
+    name?: string;
+    email?: string;
+    address?: string;
+    ptype?: "residential" | "commercial";
+  }>();
+
+  // listen for global "open-book" (e.g., from navbar)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      if (typeof (e as any).preventDefault === "function") {
+        (e as any).preventDefault();
+      }
+      const detail = (e as CustomEvent).detail as typeof prefill | undefined;
+      if (detail) setPrefill(detail);
+      setDrawer(true);
+    };
+    window.addEventListener("open-book", handler as EventListener);
+    return () => window.removeEventListener("open-book", handler as EventListener);
+  }, []);
+
   const PHONE = "(312) 488-9775";
   const EMAIL = "info@cumberlandbrooks.com";
   const ADDRESS = "752 S. 6th St., Ste. R, Las Vegas, NV 89101";
@@ -34,19 +59,36 @@ export default function ContactPage() {
     } catch {}
   }
 
+  // single source of truth for Calendly URL (env first, then profile fallback)
+  const calendlySrc = useMemo(() => {
+    const base =
+      process.env.NEXT_PUBLIC_BOOKING_URL ??
+      "https://calendly.com/narasimhareddyputta999"; // profile page won't 404
+    const url = new URL(base);
+    url.searchParams.set("hide_gdpr_banner", "1");
+    url.searchParams.set("background_color", "ffffff");
+    return url.toString();
+  }, []);
+
   return (
     <main className="text-slate-800">
       {/* HERO */}
       <section className="relative isolate overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800">
-        <div className="absolute inset-0 -z-10 opacity-30" style={{ background: "radial-gradient(60% 60% at 50% 0%, #4f46e5, transparent)" }} />
+        <div
+          className="absolute inset-0 -z-10 opacity-30"
+          style={{ background: "radial-gradient(60% 60% at 50% 0%, #4f46e5, transparent)" }}
+        />
         <div className="mx-auto max-w-7xl px-4 py-16 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
             <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-indigo-200 ring-1 ring-white/20 backdrop-blur">
               <ShieldCheck className="h-4 w-4" /> No upfront fees — you pay from savings
             </p>
-            <h1 className="mt-4 font-serif text-4xl leading-tight text-white md:text-5xl">Talk to a specialist</h1>
+            <h1 className="mt-4 font-serif text-4xl leading-tight text-white md:text-5xl">
+              Talk to a specialist
+            </h1>
             <p className="mt-3 text-lg text-slate-200/90">
-              Book instantly or send a message. No pressure, no retainer—just clear next steps and real savings.
+              Book instantly or send a message. No pressure, no retainer—just clear next steps and real
+              savings.
             </p>
 
             {/* quick trust */}
@@ -147,11 +189,7 @@ export default function ContactPage() {
                 </span>
               </div>
               <div className="mt-3 h-[520px] overflow-hidden rounded-md border">
-                <iframe
-                  title="Calendly"
-                  src="https://calendly.com/narasimhareddyputta999/15min?hide_gdpr_banner=1&background_color=ffffff"
-                  className="h-full w-full"
-                />
+                <iframe title="Calendly" src={calendlySrc} className="h-full w-full" />
               </div>
               <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
                 <p>We’ll confirm and send reminders.</p>
@@ -203,15 +241,21 @@ export default function ContactPage() {
             <div className="grid items-center gap-4 md:grid-cols-12">
               <div className="md:col-span-8">
                 <p className="text-indigo-300">Ready when you are</p>
-                <h4 className="mt-1 font-serif text-2xl">Let’s turn your bills and balances into savings.</h4>
+                <h4 className="mt-1 font-serif text-2xl">
+                  Let’s turn your bills and balances into savings.
+                </h4>
                 <p className="mt-1 text-slate-300">
-                  Book now or send a short note—we’ll reply with clear next steps and expected timelines.
+                  Book now or send a short note—we’ll reply with clear next steps and expected
+                  timelines.
                 </p>
               </div>
               <div className="md:col-span-4">
                 <div className="flex flex-col gap-2">
-                  <Button asChild className="rounded-full">
-                    <Link href="/book">Book Free Consultation</Link>
+                  <Button
+                    onClick={() => setDrawer(true)}
+                    className="rounded-full"
+                  >
+                    Book Free Consultation
                   </Button>
                   <Button
                     asChild
@@ -226,6 +270,9 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      {/* Drawer */}
+      <BookDrawer open={drawer} onOpenChange={setDrawer} prefill={prefill} />
     </main>
   );
 }
@@ -339,11 +386,7 @@ function ContactForm({
         </label>
       </div>
 
-      <Button
-        type="submit"
-        className="mt-4 rounded-full"
-        disabled={loading}
-      >
+      <Button type="submit" className="mt-4 rounded-full" disabled={loading}>
         {loading ? "Sending…" : "Send"}
       </Button>
 

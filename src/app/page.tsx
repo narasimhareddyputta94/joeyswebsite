@@ -436,9 +436,7 @@ function ServicesSlider() {
       rafRef.current = requestAnimationFrame(tick);
       return;
     }
-    // compute velocity
     const now = performance.now();
-    // remember last time on the track element (avoid extra ref)
     const last = (track as any)._lastTime ?? now;
     (track as any)._lastTime = now;
     const dt = Math.max(0, now - last) / 1000; // seconds
@@ -446,12 +444,10 @@ function ServicesSlider() {
     const pxPerSec = ((slideW + GAP) / 1.6) * SPEED_SCALE * speedRef.current;
     offsetRef.current += pxPerSec * dt;
 
-    // wrap around seamlessly
     if (offsetRef.current >= totalRealWidth) {
       offsetRef.current -= totalRealWidth;
     }
 
-    // apply transform
     track.style.transform = `translate3d(${-offsetRef.current}px,0,0)`;
     rafRef.current = requestAnimationFrame(tick);
   };
@@ -459,7 +455,6 @@ function ServicesSlider() {
   useEffect(() => {
     const frame = frameRef.current;
     if (!frame) return;
-    // hover pause/resume
     const pause = () => { pausedRef.current = true; };
     const resume = () => { (trackRef.current as any)._lastTime = performance.now(); pausedRef.current = false; };
     frame.addEventListener("mouseenter", pause);
@@ -478,14 +473,11 @@ function ServicesSlider() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slideW, baseLen]);
 
-  /* --- controls --- */
   const nudge = (dir: -1 | 1) => {
-    // gentle nudge: momentarily speed up / slow down
     speedRef.current = dir === 1 ? 1.75 : 0.35;
     window.setTimeout(() => (speedRef.current = 1), 450);
   };
 
-  /* --- active dot (where the “window start” sits) --- */
   const activeDot = slideW ? Math.floor((offsetRef.current / (slideW + GAP)) % baseLen) : 0;
 
   return (
@@ -510,7 +502,7 @@ function ServicesSlider() {
           </div>
         </div>
 
-        <div className="relative mx-auto mt-8"> {/* full width of container for bigger cards */}
+        <div className="relative mx-auto mt-8">
           {/* controls (top-right) */}
           <div className="pointer-events-none absolute -top-12 right-0 hidden gap-2 sm:flex">
             <button
@@ -529,7 +521,7 @@ function ServicesSlider() {
             </button>
           </div>
 
-          {/* frame (no hard max width so cards can breathe) */}
+          {/* frame */}
           <div ref={frameRef} className="overflow-hidden rounded-2xl">
             <div
               ref={trackRef}
@@ -571,15 +563,13 @@ function ServicesSlider() {
             </div>
           </div>
 
-          {/* dots (map to the real list, not the clones) */}
+          {/* dots */}
           <div className="mt-5 flex items-center justify-center gap-2">
             {Array.from({ length: baseLen }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => {
-                  // jump the offset near that dot’s start without snapping
                   offsetRef.current = i * (slideW + GAP);
-                  // reset last time to avoid velocity spike
                   if (trackRef.current) (trackRef.current as any)._lastTime = performance.now();
                 }}
                 aria-label={`Go to slide ${i + 1}`}
@@ -880,6 +870,19 @@ function StickyCTA({ onOpenBook }: { onOpenBook: () => void }) {
 export default function Page() {
   const [drawer, setDrawer] = useState(false);
   const [prefill, setPrefill] = useState<{ name?: string; email?: string; address?: string; ptype?: "residential" | "commercial" }>();
+
+  /* 🔗 Listen for navbar’s `open-book` event and open this page’s drawer */
+  useEffect(() => {
+    const handler = (e: Event) => {
+      // Prevent navbar fallback (opening a new tab) if it dispatched a cancelable event
+      if (typeof (e as any).preventDefault === "function") (e as any).preventDefault();
+      const detail = (e as CustomEvent).detail as typeof prefill | undefined;
+      if (detail) setPrefill(detail);
+      setDrawer(true);
+    };
+    window.addEventListener("open-book", handler as EventListener);
+    return () => window.removeEventListener("open-book", handler as EventListener);
+  }, []);
 
   return (
     <main className="text-slate-800">

@@ -8,6 +8,12 @@ import BookDrawer from "@/components/BookDrawer";
 export default function CTASticky() {
   const [show, setShow] = useState(false);
   const [drawer, setDrawer] = useState(false);
+  const [prefill, setPrefill] = useState<{
+    name?: string;
+    email?: string;
+    address?: string;
+    ptype?: "residential" | "commercial";
+  }>();
   const ref = useRef<HTMLDivElement>(null);
 
   // show after scroll
@@ -48,6 +54,20 @@ export default function CTASticky() {
     };
   }, [show]);
 
+  // 🔗 Listen for global "open-book" (from navbar or anywhere) and open this drawer
+  useEffect(() => {
+    const handler = (e: Event) => {
+      if (typeof (e as any).preventDefault === "function") {
+        (e as any).preventDefault(); // cancel any fallback like opening a new tab
+      }
+      const detail = (e as CustomEvent).detail as typeof prefill | undefined;
+      if (detail) setPrefill(detail);
+      setDrawer(true);
+    };
+    window.addEventListener("open-book", handler as EventListener);
+    return () => window.removeEventListener("open-book", handler as EventListener);
+  }, []);
+
   if (!show) return null;
 
   return (
@@ -78,7 +98,8 @@ export default function CTASticky() {
           </div>
         </div>
       </div>
-      <BookDrawer open={drawer} onOpenChange={setDrawer} />
+
+      <BookDrawer open={drawer} onOpenChange={setDrawer} prefill={prefill} />
     </>
   );
 }

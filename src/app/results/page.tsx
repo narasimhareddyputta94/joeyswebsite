@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BookDrawer from "@/components/BookDrawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -95,12 +96,26 @@ const fadeIn = {
 export default function ResultsPage() {
   const [active, setActive] = useState<(typeof TAGS)[number]>("All");
 
-  // Navbar “Book” behavior → open Calendly directly on this page
-  const onOpenBook = () => {
-    if (typeof window !== "undefined") {
-      window.open("https://calendly.com/narasimhareddyputta999/15min", "_blank", "noopener,noreferrer");
-    }
-  };
+  // Drawer state + (optional) prefill for Calendly custom Qs
+  const [drawer, setDrawer] = useState(false);
+  const [prefill, setPrefill] = useState<{
+    name?: string;
+    email?: string;
+    address?: string;
+    ptype?: "residential" | "commercial";
+  }>();
+
+  // Let navbar/global callers open the drawer on this page
+  useEffect(() => {
+    const handler = (e: Event) => {
+      if (typeof (e as any).preventDefault === "function") (e as any).preventDefault();
+      const detail = (e as CustomEvent).detail as typeof prefill | undefined;
+      if (detail) setPrefill(detail);
+      setDrawer(true);
+    };
+    window.addEventListener("open-book", handler as EventListener);
+    return () => window.removeEventListener("open-book", handler as EventListener);
+  }, []);
 
   const filtered = useMemo(() => {
     if (active === "All") return CASES;
@@ -114,7 +129,6 @@ export default function ResultsPage() {
 
   return (
     <main className="bg-gradient-to-b from-white to-slate-50 text-slate-800">
-
       {/* HERO */}
       <section className="relative isolate overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_50%_-10%,rgba(79,70,229,0.18),transparent)]" />
@@ -283,7 +297,7 @@ export default function ResultsPage() {
             <p className="mt-1 text-slate-300">Start with a free, no-pressure consultation. You only pay when we save you money.</p>
           </div>
           <div className="flex gap-2">
-            <Button className="rounded-full" onClick={onOpenBook}>
+            <Button className="rounded-full" onClick={() => setDrawer(true)}>
               Book Free Consultation <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
             <Button asChild variant="secondary" className="rounded-full bg-white text-slate-900 hover:bg-slate-100">
@@ -293,7 +307,8 @@ export default function ResultsPage() {
         </div>
       </section>
 
-      
+      {/* Drawer */}
+      <BookDrawer open={drawer} onOpenChange={setDrawer} prefill={prefill} />
     </main>
   );
 }

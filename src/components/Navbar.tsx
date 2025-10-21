@@ -101,21 +101,35 @@ const services = [
 function BrandMark() {
   const [broken, setBroken] = useState(false);
   return (
-    <div className="relative h-8 w-8 overflow-hidden rounded-lg" aria-label="Cumberland Brooks">
-      <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-indigo-600 to-blue-500" aria-hidden />
+    <div className="relative h-10 w-10 overflow-hidden rounded-none" aria-label="Cumberland Brooks">
       {!broken && (
         <Image
-          src="/logo.svg"
+          src="/logo.png"
           alt="Cumberland Brooks"
           fill
           priority
-          sizes="32px"
+          sizes="40px"
           className="object-contain"
           onError={() => setBroken(true)}
         />
       )}
     </div>
   );
+}
+
+const CAL_URL = "https://calendly.com/narasimhareddyputta999/15min";
+
+/** Fire modal event; if nobody handles it, open Calendly in a new tab */
+function openBook() {
+  try {
+    const evt = new CustomEvent("open-book", { cancelable: true });
+    const notPrevented = window.dispatchEvent(evt);
+    if (notPrevented) {
+      window.open(CAL_URL, "_blank", "noopener,noreferrer");
+    }
+  } catch {
+    window.open(CAL_URL, "_blank", "noopener,noreferrer");
+  }
 }
 
 export default function Navbar() {
@@ -164,8 +178,6 @@ export default function Navbar() {
       document.removeEventListener("keydown", onEsc);
     };
   }, [mega]);
-
-  const openBook = () => window.dispatchEvent(new CustomEvent("open-book", { detail: {} }));
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
