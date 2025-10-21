@@ -1,7 +1,7 @@
 // src/app/about/AboutClient.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,6 @@ import {
   BadgeCheck,
   FileText,
   Shield,
-  HelpCircle,
 } from "lucide-react";
 
 export default function AboutClient() {
@@ -195,7 +194,7 @@ export default function AboutClient() {
         </div>
       </section>
 
-      {/* CASE-TYPE PLAYBOOKS (deeper, practical) */}
+      {/* CASE-TYPE PLAYBOOKS */}
       <section className="bg-gradient-to-b from-white to-slate-50 py-20">
         <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="mx-auto max-w-3xl text-center">
@@ -386,11 +385,13 @@ function Stat({ k, t }: { k: string; t: string }) {
   );
 }
 
-function InfoCard({ icon, h, d }: { icon: JSX.Element; h: string; d: string }) {
+function InfoCard({ icon, h, d }: { icon: ReactNode; h: string; d: string }) {
   return (
     <Card className="transition hover:shadow-md">
       <CardContent className="p-6">
-        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">{icon}</div>
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+          {icon}
+        </div>
         <p className="mt-3 font-medium text-slate-900">{h}</p>
         <p className="mt-2 text-sm text-slate-600">{d}</p>
       </CardContent>
@@ -398,7 +399,7 @@ function InfoCard({ icon, h, d }: { icon: JSX.Element; h: string; d: string }) {
   );
 }
 
-function Pillar({ icon, h, d }: { icon: JSX.Element; h: string; d: string }) {
+function Pillar({ icon, h, d }: { icon: ReactNode; h: string; d: string }) {
   return (
     <Card className="transition-all hover:shadow-lg">
       <CardContent className="p-6">
@@ -438,12 +439,12 @@ function Playbook({
   badgeIcon,
   badgeText,
 }: {
-  icon: JSX.Element;
+  icon: ReactNode;
   title: string;
   desc: string;
   chips: string[];
-  triad: { icon: JSX.Element; h: string; d: string }[];
-  badgeIcon: JSX.Element;
+  triad: { icon: ReactNode; h: string; d: string }[];
+  badgeIcon: ReactNode;
   badgeText: string;
 }) {
   return (
@@ -499,7 +500,7 @@ function FAQ({ q, a }: { q: string; a: string }) {
   );
 }
 
-function Proof({ k, t, icon }: { k: string; t: string; icon: JSX.Element }) {
+function Proof({ k, t, icon }: { k: string; t: string; icon: ReactNode }) {
   return (
     <Card className="border-indigo-100">
       <CardContent className="flex items-center gap-3 p-5">

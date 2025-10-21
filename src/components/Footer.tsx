@@ -20,6 +20,22 @@ import {
   Youtube,
 } from "lucide-react";
 
+const CAL_URL = "https://calendly.com/narasimhareddyputta999/15min";
+
+/** Dispatch global 'open-book' for the right-side drawer listeners; fallback to Calendly tab */
+function openBook() {
+  try {
+    const evt = new CustomEvent("open-book", { cancelable: true, detail: {} });
+    const notPrevented = window.dispatchEvent(evt);
+    if (notPrevented) {
+      // if no page-level listener is mounted, open Calendly in a new tab
+      window.open(CAL_URL, "_blank", "noopener,noreferrer");
+    }
+  } catch {
+    window.open(CAL_URL, "_blank", "noopener,noreferrer");
+  }
+}
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
@@ -35,7 +51,6 @@ export default function Footer() {
           {/* Brand + Value */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2" aria-label="Cumberland Brooks, LLC — Home">
-              {/* ✅ Replaced gradient with actual logo */}
               <div className="relative h-9 w-9">
                 <Image
                   src="/logo.png"
@@ -93,16 +108,15 @@ export default function Footer() {
               <Button asChild className="rounded-full">
                 <Link href="/contact" aria-label="Contact our team">Contact us</Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-full">
-                <Link
-                  href="https://calendly.com/narasimhareddyputta999/15min"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center"
-                  aria-label="Book a free consultation on Calendly"
-                >
-                  Book free consult <ChevronRight className="ml-1 h-4 w-4" aria-hidden />
-                </Link>
+
+              {/* Changed to a real button that opens the right-side drawer (or Calendly fallback) */}
+              <Button
+                variant="outline"
+                className="rounded-full inline-flex items-center"
+                onClick={openBook}
+                aria-label="Book a free consultation"
+              >
+                Book free consult <ChevronRight className="ml-1 h-4 w-4" aria-hidden />
               </Button>
             </div>
           </div>

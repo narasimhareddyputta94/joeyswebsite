@@ -134,7 +134,7 @@ export default function ServicesPage() {
         <div className="absolute inset-0 -z-10">
           {/* soft gradients */}
           <div className="absolute inset-0 bg-[radial-gradient(70%_70%_at_70%_-10%,rgba(59,130,246,0.25),transparent),radial-gradient(60%_60%_at_10%_10%,rgba(99,102,241,0.25),transparent)]" />
-          {/* REPLACED BROKEN IMAGE WITH A RELIABLE ONE */}
+          {/* Background image */}
           <img
             src="https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1600&q=80"
             alt="Law library"
@@ -177,10 +177,10 @@ export default function ServicesPage() {
             </div>
           </div>
 
-          {/* “Conference” image — kept as <img> to avoid next/image domain config */}
+          {/* “Conference” image — REPLACED with a reliable URL */}
           <div className="relative h-64 w-full overflow-hidden rounded-2xl shadow-xl">
             <img
-              src="https://images.unsplash.com/photo-1528744598421-b7b93e12df0a?auto=format&fit=crop&w=1600&q=80"
+              src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1600&q=80"
               alt="Conference"
               className="h-full w-full object-cover"
             />
@@ -193,7 +193,7 @@ export default function ServicesPage() {
 
         {/* Stats row */}
         <div className="border-t bg-white/80 backdrop-blur">
-          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-4 py-4 sm:grid-cols-3 md:px-6">
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-4 py-4 sm:grid-cols=3 md:px-6 sm:grid-cols-3">
             {stats.map((s, i) => (
               <div key={i} className="flex items-center gap-3 rounded-xl border bg-white px-4 py-3">
                 <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
@@ -266,25 +266,25 @@ export default function ServicesPage() {
             <h2 className="font-serif text-3xl text-slate-900 md:text-4xl">Comprehensive practice coverage</h2>
           </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {fullCatalog.map((s, i) => (
-            <Card key={i} className="group transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <CardContent className="flex items-start gap-3 p-5">
-                <div className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                  {s.icon}
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900">{s.t}</p>
-                  <p className="mt-1 text-sm text-slate-600">{s.d}</p>
-                  <Link href={s.link} className="mt-2 inline-flex items-center text-sm font-medium text-indigo-600">
-                    {s.link.startsWith("/services") ? "View service" : "Start a review"}{" "}
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {fullCatalog.map((s, i) => (
+              <Card key={i} className="group transition-all hover:-translate-y-0.5 hover:shadow-md">
+                <CardContent className="flex items-start gap-3 p-5">
+                  <div className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                    {s.icon}
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900">{s.t}</p>
+                    <p className="mt-1 text-sm text-slate-600">{s.d}</p>
+                    <Link href={s.link} className="mt-2 inline-flex items-center text-sm font-medium text-indigo-600">
+                      {s.link.startsWith("/services") ? "View service" : "Start a review"}{" "}
+                      <ChevronRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
           {/* Industries */}
           <div className="mt-14">

@@ -1,10 +1,8 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { motion, type Variants } from "framer-motion";
 import BookDrawer from "@/components/BookDrawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,7 +29,7 @@ type Case = {
   title: string;
   text: string;
   tag: "Medical" | "Commercial" | "Residential" | "Collections";
-  icon: JSX.Element;
+  icon: ReactNode; // ✅ no JSX namespace
   details?: string;
 };
 
@@ -88,15 +86,25 @@ const CASES: Case[] = [
 
 const TAGS = ["All", "Medical", "Commercial", "Residential", "Collections"] as const;
 
-const fadeIn = {
+// ✅ Framer Motion variants with correct typing + cubic-bezier easing
+const container: Variants = {
+  hidden: { opacity: 1 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const fadeIn: Variants = {
   hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] }, // easeOutQuart-ish
+  },
 };
 
 export default function ResultsPage() {
   const [active, setActive] = useState<(typeof TAGS)[number]>("All");
 
-  // Drawer state + (optional) prefill for Calendly custom Qs
+  // Drawer state + optional prefill for Calendly custom questions
   const [drawer, setDrawer] = useState(false);
   const [prefill, setPrefill] = useState<{
     name?: string;
@@ -105,7 +113,7 @@ export default function ResultsPage() {
     ptype?: "residential" | "commercial";
   }>();
 
-  // Let navbar/global callers open the drawer on this page
+  // Allow global "open-book" events (Navbar/Sticky CTA) to open this page's drawer
   useEffect(() => {
     const handler = (e: Event) => {
       if (typeof (e as any).preventDefault === "function") (e as any).preventDefault();
@@ -122,9 +130,11 @@ export default function ResultsPage() {
     return CASES.filter((c) => c.tag === active);
   }, [active]);
 
-  // subtle entrance
+  // ensure top-of-page on mount
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    try {
+      window.scrollTo({ top: 0, behavior: "auto" }); // 'auto' is valid; avoids TS warnings
+    } catch {}
   }, []);
 
   return (
@@ -133,13 +143,16 @@ export default function ResultsPage() {
       <section className="relative isolate overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_50%_-10%,rgba(79,70,229,0.18),transparent)]" />
         <div className="mx-auto max-w-7xl px-4 py-16 md:px-6">
-          <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.08 } } }}>
-            <motion.p variants={fadeIn} className="text-indigo-600">Results</motion.p>
+          <motion.div initial="hidden" animate="show" variants={container}>
+            <motion.p variants={fadeIn} className="text-indigo-600">
+              Results
+            </motion.p>
             <motion.h1 variants={fadeIn} className="mt-2 font-serif text-4xl text-slate-900 md:text-5xl">
               Wins our clients can <span className="underline decoration-indigo-300 underline-offset-8">feel</span>
             </motion.h1>
             <motion.p variants={fadeIn} className="mt-3 max-w-2xl text-lg text-slate-700">
-              We focus on measurable outcomes—lower balances, reduced assessments, and clarity. Below is a sample of recent matters across practice areas.
+              We focus on measurable outcomes—lower balances, reduced assessments, and clarity. Below is a sample of
+              recent matters across practice areas.
             </motion.p>
             <motion.div variants={fadeIn} className="mt-6 flex flex-wrap gap-2">
               {TAGS.map((t) => (
@@ -195,7 +208,13 @@ export default function ResultsPage() {
       <section className="mx-auto max-w-7xl px-4 pb-12 md:px-6">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((c, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            >
               <Card className="group overflow-hidden border-slate-200 bg-white shadow-sm transition hover:shadow-lg">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -212,15 +231,24 @@ export default function ResultsPage() {
 
                   <div className="mt-4 grid grid-cols-3 gap-2 text-xs text-slate-600">
                     <div className="rounded-lg border bg-slate-50 p-2">
-                      <div className="flex items-center gap-1"><FileSearch className="h-4 w-4 text-indigo-600" /><span>Audit</span></div>
+                      <div className="flex items-center gap-1">
+                        <FileSearch className="h-4 w-4 text-indigo-600" />
+                        <span>Audit</span>
+                      </div>
                       <p className="mt-1">Records & evidence</p>
                     </div>
                     <div className="rounded-lg border bg-slate-50 p-2">
-                      <div className="flex items-center gap-1"><BarChart3 className="h-4 w-4 text-indigo-600" /><span>Analysis</span></div>
+                      <div className="flex items-center gap-1">
+                        <BarChart3 className="h-4 w-4 text-indigo-600" />
+                        <span>Analysis</span>
+                      </div>
                       <p className="mt-1">Valuation / coding</p>
                     </div>
                     <div className="rounded-lg border bg-slate-50 p-2">
-                      <div className="flex items-center gap-1"><Scale className="h-4 w-4 text-indigo-600" /><span>Outcome</span></div>
+                      <div className="flex items-center gap-1">
+                        <Scale className="h-4 w-4 text-indigo-600" />
+                        <span>Outcome</span>
+                      </div>
                       <p className="mt-1">Reduced liability</p>
                     </div>
                   </div>
@@ -234,8 +262,11 @@ export default function ResultsPage() {
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardContent className="p-6">
-              <div className="flex items-center gap-2 text-indigo-600"><Sparkles className="h-5 w-5" /><p className="font-medium">Our method</p></div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm text-slate-700">
+              <div className="flex items-center gap-2 text-indigo-600">
+                <Sparkles className="h-5 w-5" />
+                <p className="font-medium">Our method</p>
+              </div>
+              <div className="mt-3 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
                 <div className="rounded-xl border bg-white p-4">
                   <p className="font-semibold text-slate-900">1) Evidence-first</p>
                   <p className="mt-1">Chargemaster/coding audits, comps, NOI models, chain-of-custody docs.</p>
@@ -254,11 +285,20 @@ export default function ResultsPage() {
 
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center gap-2 text-indigo-600"><BadgeCheck className="h-5 w-5" /><p className="font-medium">Why clients choose us</p></div>
+              <div className="flex items-center gap-2 text-indigo-600">
+                <BadgeCheck className="h-5 w-5" />
+                <p className="font-medium">Why clients choose us</p>
+              </div>
               <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-600" /> No upfront fees</li>
-                <li className="flex items-center gap-2"><Timer className="h-4 w-4 text-emerald-600" /> Typical results in weeks</li>
-                <li className="flex items-center gap-2"><Scale className="h-4 w-4 text-emerald-600" /> Transparent, ethical advocacy</li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600" /> No upfront fees
+                </li>
+                <li className="flex items-center gap-2">
+                  <Timer className="h-4 w-4 text-emerald-600" /> Typical results in weeks
+                </li>
+                <li className="flex items-center gap-2">
+                  <Scale className="h-4 w-4 text-emerald-600" /> Transparent, ethical advocacy
+                </li>
               </ul>
               <div className="mt-4">
                 <Button asChild className="w-full rounded-full">
@@ -269,7 +309,7 @@ export default function ResultsPage() {
           </Card>
         </div>
 
-        {/* TESTIMONIAL SNIPPET */}
+        {/* TESTIMONIALS */}
         <div className="mt-12 rounded-2xl border bg-white/70 p-6">
           <div className="grid gap-6 md:grid-cols-3">
             {[
@@ -294,7 +334,9 @@ export default function ResultsPage() {
         <div className="mt-12 flex flex-col items-center justify-between gap-4 rounded-2xl border bg-slate-900 p-6 text-slate-100 sm:flex-row">
           <div>
             <p className="font-serif text-2xl">Want similar results?</p>
-            <p className="mt-1 text-slate-300">Start with a free, no-pressure consultation. You only pay when we save you money.</p>
+            <p className="mt-1 text-slate-300">
+              Start with a free, no-pressure consultation. You only pay when we save you money.
+            </p>
           </div>
           <div className="flex gap-2">
             <Button className="rounded-full" onClick={() => setDrawer(true)}>
@@ -307,7 +349,7 @@ export default function ResultsPage() {
         </div>
       </section>
 
-      {/* Drawer */}
+      {/* Right-side drawer with 15-min Calendly */}
       <BookDrawer open={drawer} onOpenChange={setDrawer} prefill={prefill} />
     </main>
   );
