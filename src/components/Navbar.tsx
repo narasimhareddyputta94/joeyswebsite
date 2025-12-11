@@ -11,18 +11,14 @@ import {
   ChevronRight,
   Phone,
   ShieldCheck,
-  Sparkles,
-  Gauge,
   Search,
-  Clock4,
   Briefcase,
   Building2,
-  FileText,
   Gavel,
   Stethoscope,
   Handshake,
-  Landmark,
-  LandPlot,
+  Lock,
+  FileCheck2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -30,7 +26,7 @@ function cn(...a: (string | false | undefined)[]) {
   return a.filter(Boolean).join(" ");
 }
 
-/** Services config (icon + copy = instant scannability) */
+/** Services config (Refined list) */
 const services = [
   {
     title: "Property Tax Appeals",
@@ -54,25 +50,11 @@ const services = [
     bullets: ["FDCPA/FCRA leverage", "Pay-for-delete (when viable)", "Score recovery path"],
   },
   {
-    title: "Business & Startup Counsel",
+    title: "Business Counsel",
     href: "/services/business",
     desc: "Formation, contracts, governance & on-call counsel.",
     icon: Briefcase,
     bullets: ["Entity setup", "Cap table basics", "Outside GC retainer"],
-  },
-  {
-    title: "Contracts & Commercial Agreements",
-    href: "/services/contracts",
-    desc: "Drafting, review, redlines & negotiation.",
-    icon: FileText,
-    bullets: ["Benchmark pricing", "SLA enforcement", "Exit/renewal strategy"],
-  },
-  {
-    title: "Real Estate & Leasing",
-    href: "/services/real-estate",
-    desc: "Purchase/sale, leases, diligence & closings.",
-    icon: Landmark,
-    bullets: ["Lease abstraction", "CAM audits", "Renewal leverage"],
   },
   {
     title: "Mediation & Dispute Resolution",
@@ -87,13 +69,6 @@ const services = [
     desc: "Policies, training, and risk-based programs.",
     icon: ShieldCheck,
     bullets: ["HIPAA/PCI aware", "Policy drafting", "Staff training"],
-  },
-  {
-    title: "Utilities & Telecom Disputes",
-    href: "/services/utilities",
-    desc: "Back-billing disputes, fee removals, outage credits.",
-    icon: LandPlot,
-    bullets: ["Back-bill audits", "Fee removals", "Outage credits"],
   },
 ];
 
@@ -115,21 +90,6 @@ function BrandMark() {
       )}
     </div>
   );
-}
-
-const CAL_URL = "https://calendly.com/narasimhareddyputta999/15min";
-
-/** Fire modal event; if nobody handles it, open Calendly in a new tab */
-function openBook() {
-  try {
-    const evt = new CustomEvent("open-book", { cancelable: true });
-    const notPrevented = window.dispatchEvent(evt);
-    if (notPrevented) {
-      window.open(CAL_URL, "_blank", "noopener,noreferrer");
-    }
-  } catch {
-    window.open(CAL_URL, "_blank", "noopener,noreferrer");
-  }
 }
 
 export default function Navbar() {
@@ -187,16 +147,26 @@ export default function Navbar() {
 
   return (
     <header className={cn("sticky top-0 z-50 transition-all border-b", scrolled ? "backdrop-blur bg-white/80" : "bg-white/95")}>
-      {/* Trust mini-bar */}
+      
+      {/* --- TRUST BAR --- */}
       <div className="hidden border-b bg-white/60 md:block">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-xs text-slate-600 md:px-6">
-          <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-emerald-600" /> No upfront fees — pay from savings</span>
-            <span className="hidden sm:inline-flex items-center gap-1"><Gauge className="h-4 w-4 text-indigo-600" /> Avg. kickoff in ~1 week</span>
-            <span className="hidden lg:inline-flex items-center gap-1"><Sparkles className="h-4 w-4 text-violet-600" /> HIPAA/PCI-aware intake</span>
+          <div className="flex items-center gap-6">
+            <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
+              <Lock className="h-3.5 w-3.5 text-slate-500" /> 
+              100% Secure & Confidential
+            </span>
+            <span className="hidden sm:inline-flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> 
+              No upfront fees — pay from savings
+            </span>
+            <span className="hidden lg:inline-flex items-center gap-1.5">
+              <FileCheck2 className="h-3.5 w-3.5 text-indigo-600" /> 
+              HIPAA/PCI-aware intake
+            </span>
           </div>
           <a href="tel:+13124889775" className="inline-flex items-center gap-2 hover:text-slate-800">
-            <Phone className="h-4 w-4" /> (312) 488-9775
+            <Phone className="h-3.5 w-3.5" /> (312) 488-9775
           </a>
         </div>
       </div>
@@ -241,7 +211,7 @@ export default function Navbar() {
                   transition={{ duration: 0.16, ease: "easeOut" }}
                   className="absolute left-1/2 top-full z-50 mt-3 -translate-x-1/2 w-[min(94vw,980px)] md:w-[min(90vw,1040px)] rounded-2xl border bg-white/95 p-4 md:p-5 shadow-2xl ring-1 ring-black/5 backdrop-blur"
                 >
-                  {/* HEADER (search only — removed extra Book button) */}
+                  {/* HEADER (search only) */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex w-full items-center gap-2 rounded-full border bg-white px-3 py-2">
                       <Search className="h-4 w-4 text-slate-400" />
@@ -257,8 +227,8 @@ export default function Navbar() {
 
                   {/* BODY */}
                   <div className="mt-4 grid grid-cols-12 gap-4 max-h-[58vh] overflow-y-auto pr-1">
-                    {/* Services grid */}
-                    <div className="col-span-12 lg:col-span-8">
+                    {/* Services grid - Full Width */}
+                    <div className="col-span-12">
                       <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
                         {filtered.map((s) => {
                           const Icon = s.icon;
@@ -300,42 +270,6 @@ export default function Navbar() {
                         )}
                       </div>
                     </div>
-
-                    {/* Right rail: outcomes & info */}
-                    <div className="col-span-12 lg:col-span-4">
-                      <div className="rounded-2xl border bg-slate-50 p-4">
-                        <p className="text-xs uppercase tracking-wide text-slate-500">Outcomes</p>
-                        <ul className="mt-2 space-y-2 text-sm">
-                          <li className="flex items-center justify-between gap-3">
-                            <span className="text-slate-700">Medical bill reduction</span>
-                            <span className="font-semibold text-emerald-700">$88,400</span>
-                          </li>
-                          <li className="flex items-center justify-between gap-3">
-                            <span className="text-slate-700">Commercial tax win</span>
-                            <span className="font-semibold text-emerald-700">$41,200</span>
-                          </li>
-                          <li className="flex items-center justify-between gap-3">
-                            <span className="text-slate-700">Collections fees removed</span>
-                            <span className="font-semibold text-emerald-700">$9,900</span>
-                          </li>
-                        </ul>
-                        <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-slate-600">
-                          <div className="inline-flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-emerald-600" /> No upfront fees</div>
-                          <div className="inline-flex items-center gap-1"><Clock4 className="h-4 w-4 text-indigo-600" /> Avg. weeks to resolve</div>
-                        </div>
-                        <Button className="mt-4 w-full rounded-full" onClick={openBook}>
-                          Book Free Consultation
-                        </Button>
-                      </div>
-
-                      <div className="mt-3 rounded-2xl border p-4">
-                        <p className="text-xs uppercase tracking-wide text-slate-500">Need a human?</p>
-                        <a href="tel:+13124889775" className="mt-2 inline-flex items-center gap-2 text-sm text-slate-800 hover:underline">
-                          <Phone className="h-4 w-4" /> (312) 488-9775
-                        </a>
-                        <p className="mt-1 text-xs text-slate-500">Mon–Fri, 9am–6pm CT</p>
-                      </div>
-                    </div>
                   </div>
 
                   {/* FOOTER */}
@@ -354,15 +288,14 @@ export default function Navbar() {
             </AnimatePresence>
           </div>
 
-          <Link href="/results" className="rounded-full px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Results</Link>
           <Link href="/about" className="rounded-full px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">About Us</Link>
           <Link href="/contact" className="rounded-full px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Contact</Link>
         </nav>
 
         {/* Desktop CTA */}
         <div className="hidden md:block">
-          <Button className="rounded-full px-5" onClick={openBook}>
-            Book a Free Consultation
+          <Button asChild className="rounded-full px-5">
+            <Link href="/contact">Book Free Consultation</Link>
           </Button>
         </div>
 
@@ -389,7 +322,7 @@ export default function Navbar() {
                 <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
               </summary>
               <div className="mt-2 grid gap-2">
-                {services.slice(0, 7).map((s) => (
+                {services.map((s) => (
                   <Link key={s.href} href={s.href} onClick={() => setOpen(false)} className="rounded-lg p-2 text-sm text-slate-700 hover:bg-slate-50">
                     {s.title}
                   </Link>
@@ -401,27 +334,26 @@ export default function Navbar() {
             </details>
 
             <div className="mt-2 grid gap-1">
-              <Link href="/results" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50">Results</Link>
               <Link href="/about" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50">About</Link>
               <Link href="/contact" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50">Contact</Link>
               <a href="tel:+13124889775" className="mt-1 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-slate-800 hover:bg-slate-50">
                 <Phone className="h-4 w-4" /> (312) 488-9775
               </a>
-              <Button
-                onClick={() => {
-                  setOpen(false);
-                  openBook();
-                }}
-                className="mt-2 w-full rounded-full"
-              >
-                Book Free Consultation
+              <Button asChild className="mt-2 w-full rounded-full">
+                <Link href="/contact" onClick={() => setOpen(false)}>Book Free Consultation</Link>
               </Button>
             </div>
 
             <div className="mt-3 grid gap-2 text-xs text-slate-600">
-              <span className="inline-flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-emerald-600" /> No upfront fees — pay from savings</span>
-              <span className="inline-flex items-center gap-1"><Gauge className="h-4 w-4 text-indigo-600" /> Avg. kickoff in ~1 week</span>
-              <span className="inline-flex items-center gap-1"><Sparkles className="h-4 w-4 text-violet-600" /> HIPAA/PCI-aware intake</span>
+              <span className="inline-flex items-center gap-2">
+                <Lock className="h-4 w-4 text-slate-400" /> 100% Secure & Confidential
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-emerald-600" /> No upfront fees — pay from savings
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <FileCheck2 className="h-4 w-4 text-indigo-600" /> HIPAA/PCI-aware intake
+              </span>
             </div>
           </motion.div>
         )}

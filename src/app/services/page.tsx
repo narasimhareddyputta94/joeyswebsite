@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  ChevronRight, Scale, Gavel, ShieldCheck, Landmark, Building2, Briefcase, FileText,
+  ChevronRight, Scale, Gavel, ShieldCheck, Landmark, Building2, Briefcase,
   Handshake, Building, Users, Stethoscope, GraduationCap, ClipboardCheck,
   Hammer, Banknote, BookOpen, UserRound, ShieldAlert, ScrollText, Clock4, Sparkles, CheckCircle2
 } from "lucide-react";
@@ -13,10 +13,11 @@ import BookDrawer from "@/components/BookDrawer";
 
 export default function ServicesPage() {
   // === Drawer (15-min Calendly) ===
+  // Kept logic in case global event fires, but removed direct buttons on this page
   const [drawer, setDrawer] = useState(false);
   const [prefill, setPrefill] = useState<{ name?: string; email?: string; address?: string; ptype?: "residential" | "commercial" }>();
 
-  // Listen for global "open-book" (fired by Navbar/Sticky/etc.)
+  // Listen for global "open-book"
   useEffect(() => {
     const handler = (e: Event) => {
       if (typeof (e as any).preventDefault === "function") (e as any).preventDefault();
@@ -28,14 +29,12 @@ export default function ServicesPage() {
     return () => window.removeEventListener("open-book", handler as EventListener);
   }, []);
 
-  // === Quick Links (all service pages) ===
+  // === Quick Links (Removed: Real Estate, Contracts) ===
   const quickLinks = [
     { href: "/services/property-tax", label: "Property Tax Appeals" },
     { href: "/services/medical-bills", label: "Medical Bills" },
     { href: "/services/collections", label: "Debt & Collections" },
     { href: "/services/business", label: "Business Counsel" },
-    { href: "/services/contracts", label: "Contracts" },
-    { href: "/services/real-estate", label: "Real Estate" },
     { href: "/services/mediation", label: "Mediation" },
     { href: "/services/compliance", label: "Compliance" },
   ];
@@ -61,13 +60,12 @@ export default function ServicesPage() {
     },
   ];
 
+  // === Full Catalog (Removed: Contracts, Real Estate) ===
   const fullCatalog = [
     { icon: <Briefcase className="h-5 w-5" />, t: "Business & Startups", d: "Entity formation, operating agreements, cap tables, governance.", link: "/services/business" },
-    { icon: <FileText className="h-5 w-5" />, t: "Contracts & Negotiation", d: "Commercial contracts, vendor MSAs, NDAs, SaaS, licensing.", link: "/services/contracts" },
-    { icon: <Building2 className="h-5 w-5" />, t: "Real Estate (Resi & Commercial)", d: "Purchase/sale, leases, title review, closings, due diligence.", link: "/services/real-estate" },
     { icon: <Handshake className="h-5 w-5" />, t: "Mediation & Settlement", d: "Early resolution strategies that protect relationships and cash flow.", link: "/services/mediation" },
     { icon: <ClipboardCheck className="h-5 w-5" />, t: "Regulatory & Compliance", d: "Policy reviews, privacy, PCI/HIPAA-aware workflows.", link: "/services/compliance" },
-    { icon: <Landmark className="h-5 w-5" />, t: "Administrative & Agency Matters", d: "Licensing, hearings, appeals, and regulatory responses.", link: "/contact" },
+    { icon: <Landmark className="h-5 w-5" />, t: "Administrative Matters", d: "Licensing defense, hearings, appeals, and regulatory responses.", link: "/contact" },
     { icon: <Users className="h-5 w-5" />, t: "Employment Advisory", d: "Handbooks, wage/hour risk checks, offers, separations, disputes.", link: "/contact" },
     { icon: <Hammer className="h-5 w-5" />, t: "Civil Litigation (select)", d: "Strategic disputes with cost/benefit discipline.", link: "/contact" },
     { icon: <Banknote className="h-5 w-5" />, t: "Consumer Finance Issues", d: "Credit reporting errors, chargeback disputes, unfair practices.", link: "/contact" },
@@ -76,10 +74,10 @@ export default function ServicesPage() {
   ];
 
   const verticals = [
-    { icon: <Building className="h-5 w-5" />, t: "Homeowners & HOAs", d: "Appeals, covenants, vendor contracts, collections." },
+    { icon: <Building className="h-5 w-5" />, t: "Homeowners & HOAs", d: "Appeals, covenants, vendor disputes, collections." },
     { icon: <Building2 className="h-5 w-5" />, t: "Commercial Owners", d: "Retail, hospitality, healthcare, industrial, office." },
     { icon: <Briefcase className="h-5 w-5" />, t: "Startups & SMBs", d: "General counsel support without in-house overhead." },
-    { icon: <GraduationCap className="h-5 w-5" />, t: "Non-profits & Schools", d: "Grants, compliance, facility & vendor contracts." },
+    { icon: <GraduationCap className="h-5 w-5" />, t: "Non-profits & Schools", d: "Grants, compliance, facility management." },
   ];
 
   const faqs = [
@@ -112,7 +110,7 @@ export default function ServicesPage() {
     {
       name: "Flat / Project Fee",
       points: [
-        "Scopable deliverables (contracts, filings, policy suites)",
+        "Scopable deliverables (policies, filings, reviews)",
         "Predictable pricing with milestone gates",
         "Great for startups & SMBs",
       ],
@@ -151,15 +149,15 @@ export default function ServicesPage() {
               From fast savings matters to ongoing counsel, we combine negotiation, compliance, and dispute strategy to
               protect your money and momentum. Start with a free case review—no pressure, no upfront fee.
             </p>
+            
+            {/* Removed Book Button, Kept Results Link */}
             <div className="mt-6 flex gap-3">
-              <Button className="rounded-full px-6" onClick={() => setDrawer(true)}>
-                Book a free consultation
-              </Button>
               <Button asChild variant="outline" className="rounded-full">
                 <Link href="/results">See recent results</Link>
               </Button>
             </div>
-            <p className="mt-2 text-xs text-slate-500">
+            
+            <p className="mt-4 text-xs text-slate-500">
               Not legal advice. Engagements subject to conflicts & jurisdictional rules.
             </p>
 
@@ -177,7 +175,7 @@ export default function ServicesPage() {
             </div>
           </div>
 
-          {/* “Conference” image — REPLACED with a reliable URL */}
+          {/* Image */}
           <div className="relative h-64 w-full overflow-hidden rounded-2xl shadow-xl">
             <img
               src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1600&q=80"
@@ -337,11 +335,7 @@ export default function ServicesPage() {
             ))}
           </div>
 
-          <div className="mt-8 text-center">
-            <Button className="rounded-full px-6" onClick={() => setDrawer(true)}>
-              Get my tailored quote
-            </Button>
-          </div>
+          {/* Removed "Get Quote" Button here as requested */}
         </div>
       </section>
 
@@ -387,15 +381,7 @@ export default function ServicesPage() {
                 </li>
               </ul>
             </div>
-            <div className="mt-6">
-              <Button
-                variant="secondary"
-                className="w-full rounded-full bg-white text-slate-900 hover:bg-slate-100"
-                onClick={() => setDrawer(true)}
-              >
-                Book a free consultation
-              </Button>
-            </div>
+            {/* Removed Book Button here */}
           </div>
         </div>
       </section>
@@ -412,9 +398,7 @@ export default function ServicesPage() {
               </p>
             </div>
             <div className="flex gap-3 md:justify-end">
-              <Button className="rounded-full" onClick={() => setDrawer(true)}>
-                Start my review
-              </Button>
+              {/* Removed "Start Review" Button */}
               <Button asChild variant="outline" className="rounded-full">
                 <Link href="/results">See results</Link>
               </Button>
@@ -423,7 +407,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Drawer (15-min Calendly) */}
+      {/* Drawer (15-min Calendly) - Kept logic for global events, but no local triggers */}
       <BookDrawer open={drawer} onOpenChange={setDrawer} prefill={prefill} />
     </main>
   );

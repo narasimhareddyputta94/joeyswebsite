@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import BookDrawer from "@/components/BookDrawer";
 import {
   Phone,
   Mail,
@@ -15,41 +14,16 @@ import {
   CheckCircle2,
   ArrowRight,
   Copy,
-  CalendarClock,
   MessageSquare,
-  Building2,
 } from "lucide-react";
 
 export default function ContactPage() {
   const [copied, setCopied] = useState<"phone" | "email" | null>(null);
   const [sent, setSent] = useState(false);
 
-  // drawer state + optional prefill (kept for future compatibility)
-  const [drawer, setDrawer] = useState(false);
-  const [prefill, setPrefill] = useState<{
-    name?: string;
-    email?: string;
-    address?: string;
-    ptype?: "residential" | "commercial";
-  }>();
-
-  // listen for global "open-book" (e.g., from navbar)
-  useEffect(() => {
-    const handler = (e: Event) => {
-      if (typeof (e as any).preventDefault === "function") {
-        (e as any).preventDefault();
-      }
-      const detail = (e as CustomEvent).detail as typeof prefill | undefined;
-      if (detail) setPrefill(detail);
-      setDrawer(true);
-    };
-    window.addEventListener("open-book", handler as EventListener);
-    return () => window.removeEventListener("open-book", handler as EventListener);
-  }, []);
-
   const PHONE = "(312) 488-9775";
   const EMAIL = "info@cumberlandbrooks.com";
-  const ADDRESS = "752 S. 6th St., Ste. R, Las Vegas, NV 89101";
+  const ADDRESS = "732 S. 6th St., Ste. R, Las Vegas, NV 89101"; // Updated address per your content
 
   async function copy(text: string, key: "phone" | "email") {
     try {
@@ -58,17 +32,6 @@ export default function ContactPage() {
       setTimeout(() => setCopied(null), 1500);
     } catch {}
   }
-
-  // single source of truth for Calendly URL (env first, then profile fallback)
-  const calendlySrc = useMemo(() => {
-    const base =
-      process.env.NEXT_PUBLIC_BOOKING_URL ??
-      "https://calendly.com/narasimhareddyputta999"; // profile page won't 404
-    const url = new URL(base);
-    url.searchParams.set("hide_gdpr_banner", "1");
-    url.searchParams.set("background_color", "ffffff");
-    return url.toString();
-  }, []);
 
   return (
     <main className="text-slate-800">
@@ -84,11 +47,10 @@ export default function ContactPage() {
               <ShieldCheck className="h-4 w-4" /> No upfront fees — you pay from savings
             </p>
             <h1 className="mt-4 font-serif text-4xl leading-tight text-white md:text-5xl">
-              Talk to a specialist
+              Contact Us
             </h1>
             <p className="mt-3 text-lg text-slate-200/90">
-              Book instantly or send a message. No pressure, no retainer—just clear next steps and real
-              savings.
+              Send a message or call us directly. No pressure, no retainer—just clear next steps and real savings.
             </p>
 
             {/* quick trust */}
@@ -176,51 +138,43 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* BODY: Calendly + Form */}
+      {/* BODY: Info Text + Form */}
       <section className="bg-gradient-to-b from-white to-slate-50 py-16">
         <div className="mx-auto max-w-7xl px-4 md:px-6">
-          <div className="grid gap-10 md:grid-cols-2">
-            {/* Calendly */}
-            <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-slate-600">Book instantly</p>
-                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-xs text-indigo-700">
-                  <CalendarClock className="h-3.5 w-3.5" /> 15-minute intro
-                </span>
+          <div className="grid gap-12 lg:grid-cols-2">
+            
+            {/* Left Column: Information Text */}
+            <div className="flex flex-col justify-center space-y-6">
+              <h2 className="font-serif text-3xl text-slate-900">
+                At Cumberland Brooks, LLC, we're here to help you reduce costs and resolve complex billing issues.
+              </h2>
+              <div className="space-y-4 text-lg text-slate-600 leading-relaxed">
+                <p>
+                  Whether you're looking to lower your property taxes or need expert support disputing medical bills or collection accounts, our expert team is ready to assist you.
+                </p>
+                <p>
+                  We value transparency, efficiency, and results—and we’re committed to providing personalized service to each of our clients.
+                </p>
               </div>
-              <div className="mt-3 h-[520px] overflow-hidden rounded-md border">
-                <iframe title="Calendly" src={calendlySrc} className="h-full w-full" />
-              </div>
-              <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                <p>We’ll confirm and send reminders.</p>
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1 text-slate-600">
-                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> No upfront fees
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-slate-600">
-                    <Lock className="h-3.5 w-3.5 text-indigo-600" /> Secure intake
-                  </span>
+              
+              <div className="pt-4">
+                <div className="inline-flex items-center gap-2 text-sm font-medium text-indigo-700 bg-indigo-50 px-4 py-2 rounded-lg">
+                  <Mail className="h-4 w-4" />
+                  {EMAIL}
                 </div>
               </div>
             </div>
 
-            {/* Form */}
+            {/* Right Column: Form */}
             <ContactForm sent={sent} setSent={setSent} />
           </div>
 
-          {/* Social proof strip */}
-          <div className="mx-auto mt-12 max-w-5xl rounded-2xl border bg-white p-5 shadow-sm">
-            <div className="grid gap-6 sm:grid-cols-3">
-              <Stat k="10k+" t="billed cases reviewed" />
-              <Stat k="Weeks" t="average resolution time" />
-              <Stat k="0 upfront" t="you pay from savings" />
-            </div>
-          </div>
+          {/* Removed the "10k cases" Stats Strip here */}
 
           {/* Micro FAQ */}
-          <div className="mx-auto mt-12 max-w-5xl">
+          <div className="mx-auto mt-16 max-w-5xl">
             <h3 className="font-serif text-2xl text-slate-900">Quick answers</h3>
-            <div className="mt-4 grid gap-4 md:grid-cols-3">
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
               <FAQCard
                 q="Do I pay anything to start?"
                 a="No. Our fee comes from the savings we secure for you. If we don’t save you money, you owe us nothing."
@@ -237,30 +191,31 @@ export default function ContactPage() {
           </div>
 
           {/* Final CTA */}
-          <div className="mx-auto mt-12 max-w-4xl rounded-2xl border bg-slate-900 p-6 text-slate-100">
-            <div className="grid items-center gap-4 md:grid-cols-12">
+          <div className="mx-auto mt-16 max-w-4xl rounded-2xl border bg-slate-900 p-8 text-slate-100">
+            <div className="grid items-center gap-6 md:grid-cols-12">
               <div className="md:col-span-8">
-                <p className="text-indigo-300">Ready when you are</p>
-                <h4 className="mt-1 font-serif text-2xl">
+                <p className="text-indigo-300 font-medium">Ready when you are</p>
+                <h4 className="mt-2 font-serif text-2xl">
                   Let’s turn your bills and balances into savings.
                 </h4>
-                <p className="mt-1 text-slate-300">
-                  Book now or send a short note—we’ll reply with clear next steps and expected
-                  timelines.
+                <p className="mt-2 text-slate-300">
+                  Book now or send a short note—we’ll reply with clear next steps and expected timelines.
                 </p>
               </div>
               <div className="md:col-span-4">
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
+                  {/* Redirects to Email Client */}
                   <Button
-                    onClick={() => setDrawer(true)}
-                    className="rounded-full"
+                    asChild
+                    className="rounded-full w-full"
                   >
-                    Book Free Consultation
+                    <a href={`mailto:${EMAIL}`}>Book Free Consultation</a>
                   </Button>
+                  
                   <Button
                     asChild
                     variant="secondary"
-                    className="rounded-full bg-white text-slate-900 hover:bg-slate-100"
+                    className="rounded-full w-full bg-white text-slate-900 hover:bg-slate-100"
                   >
                     <Link href="/services">Explore Services</Link>
                   </Button>
@@ -270,9 +225,6 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
-
-      {/* Drawer */}
-      <BookDrawer open={drawer} onOpenChange={setDrawer} prefill={prefill} />
     </main>
   );
 }
@@ -316,56 +268,46 @@ function ContactForm({
       }}
     >
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-600">Send a message</p>
+        <p className="text-sm font-medium text-slate-900">Send us a message</p>
         <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700">
           <MessageSquare className="h-3.5 w-3.5" /> Replies within 1 business day
         </span>
       </div>
 
-      <div className="mt-4 grid gap-4">
+      <div className="mt-5 grid gap-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm text-slate-600">Full name</label>
+            <label className="text-sm text-slate-600">First Name (required)</label>
             <input
-              name="name"
+              name="firstName"
               required
-              autoComplete="name"
+              autoComplete="given-name"
               className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
-            <label className="text-sm text-slate-600">Email</label>
+            <label className="text-sm text-slate-600">Last Name</label>
             <input
-              type="email"
-              name="email"
-              required
-              autoComplete="email"
-              className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="text-sm text-slate-600">Phone (optional)</label>
-            <input
-              name="phone"
-              autoComplete="tel"
-              className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-slate-600">Address (optional)</label>
-            <input
-              name="address"
-              autoComplete="street-address"
+              name="lastName"
+              autoComplete="family-name"
               className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>
 
         <div>
-          <label className="text-sm text-slate-600">Message</label>
+          <label className="text-sm text-slate-600">Email (required)</label>
+          <input
+            type="email"
+            name="email"
+            required
+            autoComplete="email"
+            className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-slate-600">Message (required)</label>
           <textarea
             name="message"
             rows={5}
@@ -386,34 +328,20 @@ function ContactForm({
         </label>
       </div>
 
-      <Button type="submit" className="mt-4 rounded-full" disabled={loading}>
-        {loading ? "Sending…" : "Send"}
+      <Button type="submit" className="mt-6 w-full rounded-full" disabled={loading}>
+        {loading ? "Sending…" : "SEND"}
       </Button>
 
       {sent ? (
-        <p className="mt-3 text-sm text-emerald-700">
+        <p className="mt-3 text-sm text-emerald-700 text-center">
           Thanks—your message is in. We’ll get back shortly.
         </p>
       ) : (
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-slate-500 text-center">
           By sending this form, you agree to our privacy policy. Your data is encrypted in transit.
         </p>
       )}
     </form>
-  );
-}
-
-function Stat({ k, t }: { k: string; t: string }) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-        <Building2 className="h-5 w-5" />
-      </div>
-      <div>
-        <p className="text-2xl font-semibold text-slate-900">{k}</p>
-        <p className="text-sm text-slate-600">{t}</p>
-      </div>
-    </div>
   );
 }
 

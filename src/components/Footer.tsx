@@ -12,29 +12,15 @@ import {
   Gavel,
   Building2,
   Stethoscope,
-  FileText,
   ChevronRight,
   Linkedin,
   Twitter,
   Facebook,
   Youtube,
+  Briefcase,
+  Handshake,
+  FileCheck2,
 } from "lucide-react";
-
-const CAL_URL = "https://calendly.com/narasimhareddyputta999/15min";
-
-/** Dispatch global 'open-book' for the right-side drawer listeners; fallback to Calendly tab */
-function openBook() {
-  try {
-    const evt = new CustomEvent("open-book", { cancelable: true, detail: {} });
-    const notPrevented = window.dispatchEvent(evt);
-    if (notPrevented) {
-      // if no page-level listener is mounted, open Calendly in a new tab
-      window.open(CAL_URL, "_blank", "noopener,noreferrer");
-    }
-  } catch {
-    window.open(CAL_URL, "_blank", "noopener,noreferrer");
-  }
-}
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -109,14 +95,10 @@ export default function Footer() {
                 <Link href="/contact" aria-label="Contact our team">Contact us</Link>
               </Button>
 
-              {/* Changed to a real button that opens the right-side drawer (or Calendly fallback) */}
-              <Button
-                variant="outline"
-                className="rounded-full inline-flex items-center"
-                onClick={openBook}
-                aria-label="Book a free consultation"
-              >
-                Book free consult <ChevronRight className="ml-1 h-4 w-4" aria-hidden />
+              <Button asChild variant="outline" className="rounded-full">
+                <Link href="/contact" aria-label="Book a free consultation">
+                  Book free consult <ChevronRight className="ml-1 h-4 w-4" aria-hidden />
+                </Link>
               </Button>
             </div>
           </div>
@@ -127,7 +109,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/services/medical-bills" className="flex items-center gap-2 hover:text-slate-900">
-                  <Stethoscope className="h-4 w-4 text-slate-400" aria-hidden /> Medical Bills &amp; Healthcare
+                  <Stethoscope className="h-4 w-4 text-slate-400" aria-hidden /> Medical Bills
                 </Link>
               </li>
               <li>
@@ -141,13 +123,18 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/services/contracts" className="flex items-center gap-2 hover:text-slate-900">
-                  <FileText className="h-4 w-4 text-slate-400" aria-hidden /> Contracts &amp; Commercial
+                <Link href="/services/business" className="flex items-center gap-2 hover:text-slate-900">
+                  <Briefcase className="h-4 w-4 text-slate-400" aria-hidden /> Business Counsel
                 </Link>
               </li>
               <li>
-                <Link href="/services/real-estate" className="flex items-center gap-2 hover:text-slate-900">
-                  <Building2 className="h-4 w-4 text-slate-400" aria-hidden /> Real Estate &amp; Leasing
+                <Link href="/services/mediation" className="flex items-center gap-2 hover:text-slate-900">
+                  <Handshake className="h-4 w-4 text-slate-400" aria-hidden /> Mediation
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/compliance" className="flex items-center gap-2 hover:text-slate-900">
+                  <ShieldCheck className="h-4 w-4 text-slate-400" aria-hidden /> Compliance
                 </Link>
               </li>
             </ul>
@@ -158,7 +145,6 @@ export default function Footer() {
             <p className="mb-3 font-medium text-slate-900">Company</p>
             <ul className="space-y-2 text-sm">
               <li><Link href="/about" className="hover:text-slate-900">About</Link></li>
-              <li><Link href="/results" className="hover:text-slate-900">Results</Link></li>
               <li><Link href="/services" className="hover:text-slate-900">All Services</Link></li>
               <li><Link href="/faq" className="hover:text-slate-900">FAQ</Link></li>
               <li><Link href="/contact" className="hover:text-slate-900">Contact</Link></li>
@@ -231,7 +217,7 @@ export default function Footer() {
 
             <div className="mt-6 space-y-2 text-xs">
               <p className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-emerald-600" aria-hidden />
+                <FileCheck2 className="h-4 w-4 text-emerald-600" aria-hidden />
                 HIPAA/PCI-aware workflows
               </p>
               <p className="flex items-center gap-2">
