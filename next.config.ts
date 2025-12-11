@@ -20,11 +20,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // ✅ Ship even if ESLint finds errors (remove once you’ve fixed types)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   // Speed up client bundles by optimizing these libraries
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
