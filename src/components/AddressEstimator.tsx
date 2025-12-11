@@ -92,8 +92,9 @@ export default function AddressEstimator({ onBook }: AddressEstimatorProps) {
           // --- AUTO DETECTION LOGIC ---
           const types = place.types || [];
           const commercialTags = [
-            "store", "point_of_interest", "establishment", 
-            "office", "commercial", "industrial", "warehouse", "lodging"
+            "store", "point_of_interest", "establishment", "office", "commercial", "industrial", "warehouse", "lodging",
+            "premise", "school", "university", "hospital", "restaurant", "cafe", "bar", "shopping_mall", "stadium",
+            "airport", "bank", "courthouse", "church"
           ];
           
           // Explicitly check if any type matches commercial tags
@@ -126,22 +127,31 @@ export default function AddressEstimator({ onBook }: AddressEstimatorProps) {
       });
 
       if (!res.ok) {
-        // Fallback Simulation
+        // Fallback Simulation (offline): scale by property type for more realistic spread
         console.warn("API unavailable, running simulation.");
         await new Promise((r) => setTimeout(r, 1500)); 
         
-        const simValue = ptype === "commercial" ? 1250000 : 450000;
-        const simSavings = Math.round(simValue * 0.025); 
+        const isCommercial = ptype === "commercial";
+        const base = isCommercial ? 1_000_000 : 280_000;
+        const spread = isCommercial ? 4_500_000 : 800_000;
+        const rand = Math.random();
+        const marketValue = base + spread * rand;
+        const assessedValue = marketValue * (isCommercial ? 0.95 + rand * 0.2 : 0.9 + rand * 0.15);
+        const targetRatio = isCommercial ? 0.82 : 0.88;
+        const potentialReduction = Math.max(0, assessedValue - marketValue * targetRatio);
+        const taxRate = isCommercial ? 0.016 : 0.012;
+        const winProbability = isCommercial ? 0.55 + rand * 0.25 : 0.45 + rand * 0.25;
+        const estimatedSavings = Math.round(potentialReduction * taxRate * winProbability);
         
         setResult({
           addressNormalized: address,
-          estimatedSavings: simSavings,
+          estimatedSavings,
           inputs: {
-            marketValue: simValue,
-            assessedValue: Math.round(simValue * 0.8),
-            taxRate: 0.02,
+            marketValue: Math.round(marketValue),
+            assessedValue: Math.round(assessedValue),
+            taxRate,
           },
-          disclaimer: "This is a preliminary estimate based on market averages."
+          disclaimer: "Preliminary heuristic estimate. Actual savings vary by jurisdiction and evidence."
         });
       } else {
         const data = await res.json();
@@ -218,6 +228,26 @@ export default function AddressEstimator({ onBook }: AddressEstimatorProps) {
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Check Savings"}
             </Button>
+          </div>
+          {/* Allow manual override if auto-detect is wrong */}
+          <div className="mt-3 flex items-center gap-2 px-1 text-xs text-slate-600">
+            <span className="font-semibold text-slate-700">Property type:</span>
+            <div className="inline-flex rounded-full border bg-white shadow-sm">
+              {["residential", "commercial"].map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setPtype(type as PropertyType)}
+                  className={`px-3 py-1 text-[11px] font-medium transition ${
+                    ptype === type ? "bg-indigo-600 text-white" : "text-slate-600 hover:bg-slate-50"
+                  } ${type === "residential" ? "rounded-l-full" : "rounded-r-full"}`}
+                  aria-pressed={ptype === type}
+                >
+                  {type === "residential" ? "Residential" : "Commercial"}
+                </button>
+              ))}
+            </div>
+            <span className="text-slate-500">(auto-detected: {ptype})</span>
           </div>
           {error && <p className="ml-4 mt-2 text-sm text-red-500 font-semibold">{error}</p>}
           <p className="mt-3 text-center text-xs text-white/70">
