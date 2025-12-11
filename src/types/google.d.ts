@@ -1,10 +1,10 @@
-// src/types/google.d.ts
+/// <reference types="google.maps" />
+
+// Ensure the Google Maps namespace is available globally once the script loads.
 export {};
 
 declare global {
-  // Available in the browser after the Maps JS API loads
   interface Window {
-    google: any; // or: google: typeof google;
+    google: typeof google;
   }
-  const google: any;
 }

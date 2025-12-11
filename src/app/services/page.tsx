@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ChevronRight, Scale, Gavel, ShieldCheck, Landmark, Building2, Briefcase,
   Handshake, Building, Users, Stethoscope, GraduationCap, ClipboardCheck,
@@ -14,14 +15,16 @@ import BookDrawer from "@/components/BookDrawer";
 export default function ServicesPage() {
   // === Drawer (15-min Calendly) ===
   // Kept logic in case global event fires, but removed direct buttons on this page
+  type Prefill = { name?: string; email?: string; address?: string; ptype?: "residential" | "commercial" };
+
   const [drawer, setDrawer] = useState(false);
-  const [prefill, setPrefill] = useState<{ name?: string; email?: string; address?: string; ptype?: "residential" | "commercial" }>();
+  const [prefill, setPrefill] = useState<Prefill>();
 
   // Listen for global "open-book"
   useEffect(() => {
-    const handler = (e: Event) => {
-      if (typeof (e as any).preventDefault === "function") (e as any).preventDefault();
-      const detail = (e as CustomEvent).detail as typeof prefill | undefined;
+    const handler = (event: Event) => {
+      event.preventDefault();
+      const detail = (event as CustomEvent<Prefill | undefined>).detail;
       if (detail) setPrefill(detail);
       setDrawer(true);
     };
@@ -133,10 +136,13 @@ export default function ServicesPage() {
           {/* soft gradients */}
           <div className="absolute inset-0 bg-[radial-gradient(70%_70%_at_70%_-10%,rgba(59,130,246,0.25),transparent),radial-gradient(60%_60%_at_10%_10%,rgba(99,102,241,0.25),transparent)]" />
           {/* Background image */}
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1600&q=80"
             alt="Law library"
-            className="h-full w-full object-cover opacity-30"
+            fill
+            className="object-cover opacity-30"
+            sizes="100vw"
+            priority
           />
           <div className="absolute inset-0 bg-white/60" />
         </div>
@@ -177,10 +183,12 @@ export default function ServicesPage() {
 
           {/* Image */}
           <div className="relative h-64 w-full overflow-hidden rounded-2xl shadow-xl">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1600&q=80"
               alt="Conference"
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(min-width: 768px) 480px, 100vw"
             />
             <div className="absolute bottom-4 left-4 rounded-xl bg-white/85 p-4 backdrop-blur">
               <p className="text-sm text-slate-600">Why clients choose us</p>

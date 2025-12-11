@@ -50,7 +50,8 @@ export async function POST(req: Request) {
       disclaimer:
         "Savings are an estimate based on public data and heuristics. Actual results vary by jurisdiction and evidence.",
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Server error" }, { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -6,7 +6,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CTASticky from "@/components/CTASticky";
 import TrustBar from "@/components/TrustBar";
-import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: "Cumberland Brooks, LLC — Expert Negotiators. Real Savings.",
@@ -76,7 +75,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Suspense fallback={null}>
           <script
             type="application/ld+json"
-            // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           />
         </Suspense>

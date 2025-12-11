@@ -104,20 +104,22 @@ const fadeIn: Variants = {
 export default function ResultsPage() {
   const [active, setActive] = useState<(typeof TAGS)[number]>("All");
 
-  // Drawer state + optional prefill for Calendly custom questions
-  const [drawer, setDrawer] = useState(false);
-  const [prefill, setPrefill] = useState<{
+  type Prefill = {
     name?: string;
     email?: string;
     address?: string;
     ptype?: "residential" | "commercial";
-  }>();
+  };
+
+  // Drawer state + optional prefill for Calendly custom questions
+  const [drawer, setDrawer] = useState(false);
+  const [prefill, setPrefill] = useState<Prefill>();
 
   // Allow global "open-book" events (Navbar/Sticky CTA) to open this page's drawer
   useEffect(() => {
-    const handler = (e: Event) => {
-      if (typeof (e as any).preventDefault === "function") (e as any).preventDefault();
-      const detail = (e as CustomEvent).detail as typeof prefill | undefined;
+    const handler = (event: Event) => {
+      event.preventDefault();
+      const detail = (event as CustomEvent<Prefill | undefined>).detail;
       if (detail) setPrefill(detail);
       setDrawer(true);
     };

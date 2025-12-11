@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ChevronRight,
@@ -24,60 +23,18 @@ import {
   Cpu,
   Bot,
   Zap,
-  Quote, // Added for the motivational section
+  Quote, 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+// --- IMPORT THE REAL COMPONENT ---
+// Ensure this path matches where you saved the file above!
+import AddressEstimator from "@/components/AddressEstimator"; 
+
 /* ----------------------------- Anim helpers ----------------------------- */
 const container = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { staggerChildren: 0.06, duration: 0.5 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
-
-/* ========================= ADDRESS ESTIMATOR ========================= */
-function AddressEstimator() {
-  const router = useRouter();
-  const [ptype, setPtype] = useState<"residential" | "commercial">("residential");
-  const [address, setAddress] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleAction() {
-    if (!address) return;
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.push("/contact");
-    }, 800);
-  }
-
-  return (
-    <div className="rounded-2xl border bg-white/90 p-4 shadow-sm backdrop-blur">
-      <div className="mb-2 flex gap-2">
-        {(["residential", "commercial"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setPtype(t)}
-            className={`rounded-full border px-3 py-1 text-sm ${
-              ptype === t ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            {t[0].toUpperCase() + t.slice(1)}
-          </button>
-        ))}
-      </div>
-      <div className="grid gap-2 sm:grid-cols-3">
-        <input
-          placeholder="Enter address to start..."
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 sm:col-span-2"
-        />
-        <Button onClick={handleAction} className="rounded-lg">
-          {loading ? "Analyzing..." : "Check Savings"}
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 /* ================================== HERO ================================== */
 function Hero() {
@@ -134,7 +91,8 @@ function Hero() {
             </Button>
           </motion.div>
 
-          <motion.div variants={item} className="mt-4 max-w-lg">
+          <motion.div variants={item} className="mt-6 max-w-lg relative z-20">
+            {/* HERE IS THE INTEGRATED COMPONENT */}
             <AddressEstimator />
           </motion.div>
 
@@ -567,7 +525,7 @@ function ContactSection() {
         <div className="flex h-full flex-col justify-center rounded-2xl border bg-slate-50 p-8 text-center shadow-sm">
           <Quote className="mx-auto h-12 w-12 text-indigo-200" />
           <blockquote className="mt-6 text-xl font-medium leading-relaxed text-slate-900 font-serif">
-            "Justice consists not in being neutral between right and wrong, but in finding out the right and upholding it."
+            &ldquo;Justice consists not in being neutral between right and wrong, but in finding out the right and upholding it.&rdquo;
           </blockquote>
           <div className="mt-6 h-1 w-12 rounded-full bg-indigo-600 mx-auto" />
           <p className="mt-4 text-sm text-slate-600">We are ready to fight for your financial peace of mind.</p>

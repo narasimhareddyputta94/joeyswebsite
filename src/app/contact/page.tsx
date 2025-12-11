@@ -146,11 +146,11 @@ export default function ContactPage() {
             {/* Left Column: Information Text */}
             <div className="flex flex-col justify-center space-y-6">
               <h2 className="font-serif text-3xl text-slate-900">
-                At Cumberland Brooks, LLC, we're here to help you reduce costs and resolve complex billing issues.
+                At Cumberland Brooks, LLC, we&apos;re here to help you reduce costs and resolve complex billing issues.
               </h2>
               <div className="space-y-4 text-lg text-slate-600 leading-relaxed">
                 <p>
-                  Whether you're looking to lower your property taxes or need expert support disputing medical bills or collection accounts, our expert team is ready to assist you.
+                  Whether you&apos;re looking to lower your property taxes or need expert support disputing medical bills or collection accounts, our expert team is ready to assist you.
                 </p>
                 <p>
                   We value transparency, efficiency, and results—and we’re committed to providing personalized service to each of our clients.

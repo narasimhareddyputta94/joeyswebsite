@@ -1,12 +1,11 @@
 // src/app/about/AboutClient.tsx
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import BookDrawer from "@/components/BookDrawer";
 import {
   ShieldCheck,
   Scale,
@@ -32,26 +31,6 @@ import {
 } from "lucide-react";
 
 export default function AboutClient() {
-  const [drawer, setDrawer] = useState(false);
-  const [prefill, setPrefill] = useState<{
-    name?: string;
-    email?: string;
-    address?: string;
-    ptype?: "residential" | "commercial";
-  }>();
-
-  // Listen for global "open-book" fired by Navbar, sticky CTA, etc.
-  useEffect(() => {
-    const handler = (e: Event) => {
-      if (typeof (e as any).preventDefault === "function") (e as any).preventDefault();
-      const detail = (e as CustomEvent).detail as typeof prefill | undefined;
-      if (detail) setPrefill(detail);
-      setDrawer(true);
-    };
-    window.addEventListener("open-book", handler as EventListener);
-    return () => window.removeEventListener("open-book", handler as EventListener);
-  }, []);
-
   return (
     <main className="text-slate-800">
       {/* HERO */}
@@ -82,15 +61,10 @@ export default function AboutClient() {
             </p>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button className="rounded-full px-6" onClick={() => setDrawer(true)}>
-                Book Free Consultation <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="rounded-full backdrop-blur bg-white/10 text-white border-white/30 hover:bg-white/20"
-              >
-                <Link href="/results">See our wins</Link>
+              <Button asChild className="rounded-full px-6">
+                <Link href="/contact">
+                  Book Free Consultation <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
               </Button>
             </div>
 
@@ -355,8 +329,8 @@ export default function AboutClient() {
               </div>
               <div className="md:col-span-4">
                 <div className="flex flex-col gap-2">
-                  <Button className="rounded-full" onClick={() => setDrawer(true)}>
-                    Book Free Consultation
+                  <Button asChild className="rounded-full">
+                    <Link href="/contact">Book Free Consultation</Link>
                   </Button>
                   <Button asChild variant="secondary" className="rounded-full bg-white text-slate-900 hover:bg-slate-100">
                     <Link href="/services">Explore Services</Link>
@@ -367,9 +341,6 @@ export default function AboutClient() {
           </div>
         </div>
       </section>
-
-      {/* Drawer (15-min Calendly) */}
-      <BookDrawer open={drawer} onOpenChange={setDrawer} prefill={prefill} />
     </main>
   );
 }
